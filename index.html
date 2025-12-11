@@ -361,12 +361,18 @@
         }
 
         @media (max-width: 768px) {
+            * {
+                box-sizing: border-box;
+            }
+            
             body {
                 padding: 10px;
+                overflow-x: hidden;
             }
             
             .container {
                 max-width: 100%;
+                overflow-x: hidden;
             }
             
             .header h1 {
@@ -380,10 +386,12 @@
             .main-content {
                 grid-template-columns: 1fr;
                 gap: 15px;
+                overflow-x: hidden;
             }
             
             .panel {
                 padding: 15px;
+                overflow-x: hidden;
             }
             
             .doc-type-buttons {
@@ -442,6 +450,7 @@
             .preview {
                 padding: 15px;
                 font-size: 0.9em;
+                overflow-x: auto;
             }
             
             /* Make invoice easier to read on mobile */
@@ -473,6 +482,7 @@
             /* Question boxes */
             .question-box {
                 padding: 15px;
+                overflow-x: hidden;
             }
             
             .question-text {
@@ -483,11 +493,57 @@
             .section-item {
                 padding: 10px;
                 font-size: 0.9em;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+            }
+            
+            .section-item h4 {
+                font-size: 1.1em;
+                margin-bottom: 8px;
+                padding-right: 30px; /* Space for remove button */
+            }
+            
+            .section-item p {
+                margin: 5px 0;
+                word-wrap: break-word;
             }
             
             .remove-btn {
-                padding: 3px 8px;
-                font-size: 0.8em;
+                padding: 5px 10px;
+                font-size: 1em;
+            }
+            
+            /* Line items for invoices */
+            .line-item {
+                padding: 10px;
+                word-wrap: break-word;
+                overflow-wrap: break-word;
+                display: block;
+            }
+            
+            .line-item-content {
+                padding-right: 35px; /* Space for remove button */
+                word-wrap: break-word;
+            }
+            
+            .line-item-content strong {
+                display: block;
+                margin-bottom: 5px;
+                word-wrap: break-word;
+            }
+            
+            /* Textarea and inputs should not overflow */
+            textarea {
+                max-width: 100%;
+                min-width: 100%;
+                box-sizing: border-box;
+            }
+            
+            input[type="text"],
+            input[type="number"],
+            input[type="date"] {
+                max-width: 100%;
+                box-sizing: border-box;
             }
             
             /* Progress bar */
