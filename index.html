@@ -582,7 +582,7 @@
         /* Print styles - hide everything except preview content */
         @media print {
             @page {
-                margin: 1in;
+                margin: 0.75in;
                 size: letter;
             }
             
@@ -614,6 +614,14 @@
             #preview {
                 padding: 0;
                 margin: 0;
+                max-width: 100%;
+            }
+            
+            .invoice-container,
+            .preview > div {
+                max-width: 100% !important;
+                padding: 0 !important;
+                margin: 0 auto !important;
             }
             
             /* Preserve background colors when printing */
@@ -1098,7 +1106,7 @@
                         max-width: 800px;
                         margin: 0 auto;
                         font-family: Arial, sans-serif;
-                        padding: 20px;
+                        padding: 0;
                     }
                     
                     .invoice-header-section {
