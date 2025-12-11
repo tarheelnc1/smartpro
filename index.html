@@ -361,16 +361,161 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                max-width: 100%;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .header p {
+                font-size: 1em;
+            }
+            
             .main-content {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
-
-            .header h1 {
-                font-size: 2em;
+            
+            .panel {
+                padding: 15px;
             }
-
+            
             .doc-type-buttons {
                 grid-template-columns: 1fr;
+            }
+            
+            .doc-type-btn {
+                padding: 25px 20px;
+                font-size: 1em;
+            }
+            
+            .doc-type-btn .icon {
+                font-size: 2em;
+            }
+            
+            /* Make buttons stack vertically on mobile */
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .button-group .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+            
+            /* Make input fields more touch-friendly */
+            input[type="text"],
+            input[type="number"],
+            input[type="date"],
+            textarea,
+            select {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 14px;
+            }
+            
+            .voice-btn {
+                font-size: 0.9em;
+                padding: 12px;
+            }
+            
+            /* Make tables scrollable on mobile */
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+                font-size: 0.9em;
+            }
+            
+            table th,
+            table td {
+                padding: 8px;
+            }
+            
+            /* Adjust preview for mobile */
+            .preview {
+                padding: 15px;
+                font-size: 0.9em;
+            }
+            
+            /* Make invoice easier to read on mobile */
+            .invoice-container {
+                padding: 10px;
+            }
+            
+            .invoice-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .invoice-title {
+                margin-top: 10px;
+                font-size: 2em;
+            }
+            
+            .invoice-details {
+                flex-direction: column;
+            }
+            
+            .billed-to,
+            .invoice-info {
+                width: 100%;
+                text-align: left;
+                margin-bottom: 10px;
+            }
+            
+            /* Question boxes */
+            .question-box {
+                padding: 15px;
+            }
+            
+            .question-text {
+                font-size: 1.1em;
+            }
+            
+            /* Section items */
+            .section-item {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            
+            .remove-btn {
+                padding: 3px 8px;
+                font-size: 0.8em;
+            }
+            
+            /* Progress bar */
+            .step-indicator {
+                font-size: 0.8em;
+            }
+        }
+        
+        /* Extra small devices */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .doc-type-btn {
+                padding: 20px 15px;
+            }
+            
+            .panel {
+                padding: 10px;
+            }
+            
+            table {
+                font-size: 0.8em;
+            }
+            
+            .invoice-title {
+                font-size: 1.5em;
             }
         }
 
