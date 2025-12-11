@@ -1098,151 +1098,197 @@
                         max-width: 800px;
                         margin: 0 auto;
                         font-family: Arial, sans-serif;
+                        padding: 20px;
                     }
-                    .invoice-header {
-                        display: flex;
-                        justify-content: space-between;
-                        margin-bottom: 30px;
-                        padding-bottom: 20px;
-                        border-bottom: 3px solid #000;
+                    
+                    .invoice-header-section {
+                        margin-bottom: 40px;
                     }
-                    .company-info {
-                        text-align: left;
-                    }
-                    .company-info h2 {
-                        margin: 0 0 10px 0;
-                        font-size: 1.8em;
-                    }
-                    .invoice-title {
-                        text-align: right;
-                        font-size: 2.5em;
-                        font-weight: bold;
-                        color: #333;
-                    }
-                    .invoice-details {
+                    
+                    .invoice-top {
+                        display: table;
                         width: 100%;
                         margin-bottom: 30px;
                     }
-                    .invoice-details table {
+                    
+                    .invoice-top-left {
+                        display: table-cell;
+                        width: 60%;
+                        vertical-align: top;
+                    }
+                    
+                    .invoice-top-right {
+                        display: table-cell;
+                        width: 40%;
+                        vertical-align: top;
+                        text-align: right;
+                    }
+                    
+                    .invoice-title {
+                        font-size: 2.5em;
+                        font-weight: bold;
+                        color: #2c3e50;
+                        margin-bottom: 10px;
+                    }
+                    
+                    .company-name {
+                        font-size: 1.4em;
+                        font-weight: bold;
+                        color: #2c3e50;
+                        margin-bottom: 8px;
+                    }
+                    
+                    .company-details {
+                        color: #666;
+                        line-height: 1.6;
+                    }
+                    
+                    .invoice-meta {
+                        background: #f8f9fa;
+                        padding: 15px;
+                        border-left: 4px solid #667eea;
+                        margin-bottom: 30px;
+                    }
+                    
+                    .invoice-meta table {
                         width: 100%;
                         border-collapse: collapse;
                     }
-                    .invoice-details td {
-                        vertical-align: top;
+                    
+                    .invoice-meta td {
                         padding: 5px 0;
+                        vertical-align: top;
                     }
-                    .invoice-details .left-col {
-                        width: 50%;
-                        text-align: left;
-                    }
-                    .invoice-details .right-col {
-                        width: 50%;
-                        text-align: right;
-                    }
-                    .label {
+                    
+                    .invoice-meta .label-col {
+                        width: 30%;
                         font-weight: bold;
                         color: #666;
                     }
-                    .line-items {
-                        margin: 30px 0;
+                    
+                    .invoice-meta .value-col {
+                        width: 70%;
+                        color: #2c3e50;
                     }
-                    .line-items table {
+                    
+                    .line-items-table {
                         width: 100%;
                         border-collapse: collapse;
+                        margin: 30px 0;
                     }
-                    .line-items th {
-                        background: #f0f0f0;
+                    
+                    .line-items-table thead th {
+                        background: #2c3e50;
+                        color: white;
                         padding: 12px;
                         text-align: left;
-                        border-bottom: 2px solid #333;
+                        font-weight: bold;
                     }
-                    .line-items th.amount-col {
+                    
+                    .line-items-table thead th.amount-col {
                         text-align: right;
                         width: 150px;
                     }
-                    .line-items td {
+                    
+                    .line-items-table tbody td {
                         padding: 12px;
-                        border-bottom: 1px solid #ddd;
+                        border-bottom: 1px solid #e0e0e0;
                     }
-                    .line-items td.amount {
+                    
+                    .line-items-table tbody td.amount {
                         text-align: right;
                         font-weight: 500;
                     }
-                    .total-row {
-                        background: #f9f9f9;
+                    
+                    .line-items-table .total-row {
+                        background: #f8f9fa;
                         font-weight: bold;
-                        font-size: 1.1em;
                     }
-                    .total-row td {
-                        border-bottom: 3px solid #333;
+                    
+                    .line-items-table .total-row td {
                         padding: 15px 12px;
+                        font-size: 1.2em;
+                        border-bottom: 3px solid #2c3e50;
+                        color: #2c3e50;
                     }
+                    
                     .invoice-footer {
-                        margin-top: 40px;
+                        margin-top: 50px;
                         padding-top: 20px;
-                        border-top: 1px solid #ddd;
+                        border-top: 2px solid #e0e0e0;
                         color: #666;
-                        font-size: 0.95em;
+                        font-size: 0.9em;
+                        line-height: 1.8;
+                    }
+                    
+                    .invoice-footer p {
+                        margin: 10px 0;
                     }
                 </style>
                 
                 <div class="invoice-container">
-                    <div class="invoice-header">
-                        <div class="company-info">
-                            <h2>D GISS Construction II</h2>
-                            <p>43 Warner Ave<br>
-                            West Haven, CT 06516<br>
-                            (203) 997-6542<br>
-                            HIC# 0663546</p>
+                    <div class="invoice-header-section">
+                        <div class="invoice-top">
+                            <div class="invoice-top-left">
+                                <div class="company-name">D GISS Construction II</div>
+                                <div class="company-details">
+                                    43 Warner Ave<br>
+                                    West Haven, CT 06516<br>
+                                    (203) 997-6542<br>
+                                    HIC# 0663546
+                                </div>
+                            </div>
+                            <div class="invoice-top-right">
+                                <div class="invoice-title">INVOICE</div>
+                            </div>
                         </div>
-                        <div class="invoice-title">INVOICE</div>
-                    </div>
-                    
-                    <div class="invoice-details">
-                        <table>
-                            <tr>
-                                <td class="left-col">
-                                    <p class="label">BILL TO:</p>
-                                    <p style="margin-top: 5px; font-size: 1.1em;"><strong>${invoiceData.client || '[Client Name]'}</strong></p>
-                                </td>
-                                <td class="right-col">
-                                    <p><span class="label">Invoice Date:</span> ${formattedDate || '[Date]'}</p>
-                                    <p><span class="label">Invoice No:</span> ${invoiceData.invoiceNumber || '001'}</p>
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                    
-                    <div class="line-items">
-                        <table>
-                            <thead>
+                        
+                        <div class="invoice-meta">
+                            <table>
                                 <tr>
-                                    <th>Description</th>
-                                    <th class="amount-col">Amount</th>
+                                    <td class="label-col">Bill To:</td>
+                                    <td class="value-col"><strong>${invoiceData.client || '[Client Name]'}</strong></td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                ${invoiceData.lineItems.length > 0 ? invoiceData.lineItems.map(item => `
-                                    <tr>
-                                        <td>${item.description}</td>
-                                        <td class="amount">$${item.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                    </tr>
-                                `).join('') : `
-                                    <tr>
-                                        <td colspan="2" style="text-align: center; color: #999;">[No line items added]</td>
-                                    </tr>
-                                `}
-                                <tr class="total-row">
-                                    <td style="text-align: right;">TOTAL DUE:</td>
-                                    <td class="amount">$${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <tr>
+                                    <td class="label-col">Invoice Date:</td>
+                                    <td class="value-col">${formattedDate || '[Date]'}</td>
                                 </tr>
-                            </tbody>
-                        </table>
+                                <tr>
+                                    <td class="label-col">Invoice Number:</td>
+                                    <td class="value-col"><strong>#${invoiceData.invoiceNumber || '001'}</strong></td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
+                    
+                    <table class="line-items-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th class="amount-col">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${invoiceData.lineItems.length > 0 ? invoiceData.lineItems.map(item => `
+                                <tr>
+                                    <td>${item.description}</td>
+                                    <td class="amount">$${item.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                </tr>
+                            `).join('') : `
+                                <tr>
+                                    <td colspan="2" style="text-align: center; color: #999; padding: 30px;">No line items added</td>
+                                </tr>
+                            `}
+                            <tr class="total-row">
+                                <td>TOTAL DUE</td>
+                                <td class="amount">$${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                     
                     <div class="invoice-footer">
                         <p><strong>Payment Terms:</strong> Payment due upon receipt</p>
-                        <p style="margin-top: 10px;">Payments can be made by check unless other arrangements have been made.</p>
+                        <p>Payments can be made by check unless other arrangements have been made.</p>
                     </div>
                 </div>
             `;
