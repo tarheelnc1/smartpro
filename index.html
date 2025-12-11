@@ -468,14 +468,18 @@
                 font-size: 2em;
             }
             
-            .invoice-details {
-                flex-direction: column;
+            .invoice-details table {
+                display: block;
             }
             
-            .billed-to,
-            .invoice-info {
-                width: 100%;
-                text-align: left;
+            .invoice-details tr {
+                display: block;
+            }
+            
+            .invoice-details td {
+                display: block;
+                width: 100% !important;
+                text-align: left !important;
                 margin-bottom: 10px;
             }
             
@@ -1116,14 +1120,23 @@
                         color: #333;
                     }
                     .invoice-details {
-                        display: flex;
-                        justify-content: space-between;
+                        width: 100%;
                         margin-bottom: 30px;
                     }
-                    .billed-to, .invoice-info {
-                        width: 48%;
+                    .invoice-details table {
+                        width: 100%;
+                        border-collapse: collapse;
                     }
-                    .invoice-info {
+                    .invoice-details td {
+                        vertical-align: top;
+                        padding: 5px 0;
+                    }
+                    .invoice-details .left-col {
+                        width: 50%;
+                        text-align: left;
+                    }
+                    .invoice-details .right-col {
+                        width: 50%;
                         text-align: right;
                     }
                     .label {
@@ -1186,14 +1199,18 @@
                     </div>
                     
                     <div class="invoice-details">
-                        <div class="billed-to">
-                            <p class="label">BILL TO:</p>
-                            <p style="margin-top: 5px; font-size: 1.1em;"><strong>${invoiceData.client || '[Client Name]'}</strong></p>
-                        </div>
-                        <div class="invoice-info">
-                            <p><span class="label">Invoice Date:</span> ${formattedDate || '[Date]'}</p>
-                            <p><span class="label">Invoice No:</span> ${invoiceData.invoiceNumber || '001'}</p>
-                        </div>
+                        <table>
+                            <tr>
+                                <td class="left-col">
+                                    <p class="label">BILL TO:</p>
+                                    <p style="margin-top: 5px; font-size: 1.1em;"><strong>${invoiceData.client || '[Client Name]'}</strong></p>
+                                </td>
+                                <td class="right-col">
+                                    <p><span class="label">Invoice Date:</span> ${formattedDate || '[Date]'}</p>
+                                    <p><span class="label">Invoice No:</span> ${invoiceData.invoiceNumber || '001'}</p>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
                     
                     <div class="line-items">
