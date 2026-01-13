@@ -1,9 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                      SmartPro - Document Generator                           ║
+║                            VERSION HISTORY                                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Version 1.3 - January 13, 2026
+─────────────────────────────────────────────────────────────────────────────
+✓ FIXED: Increased single-page threshold from 15% to 30%
+  - Much more aggressive about keeping content on one page
+  - Content up to 30% too tall will now be scaled to fit
+  - Should eliminate 2-page splits for typical invoices/proposals
+  - Only truly long documents (1.3+ pages worth) will span multiple pages
+
+Version 1.2 - January 13, 2026
+─────────────────────────────────────────────────────────────────────────────
+✓ ENHANCED: Smart PDF fitting algorithm
+  - If content is 0-15% too tall for one page, automatically scales it down
+  - Prevents unnecessary 2-page splits for nearly-fitting content
+  - Centers horizontally when scaling down
+  - Added console logging to show which fitting method was used
+  - Much smarter handling of edge cases where content is "almost" one page
+
+Version 1.1 - January 13, 2026
+─────────────────────────────────────────────────────────────────────────────
+✓ FIXED: PDF export breaking into 2 pages unnecessarily
+  - Reduced image scale from 2x to 1.5x for smaller file size
+  - Reduced margins from 1 inch to 0.5 inch for more content space
+  - Fixed page positioning logic (was using incorrect negative offset)
+  - Added single-page detection with 2% buffer tolerance
+✓ ADDED: Version tracking system
+  - Version badge in UI (top-right)
+  - CHANGELOG.md file
+
+Version 1.0 - [Original Release]
+─────────────────────────────────────────────────────────────────────────────
+✓ Initial release with Invoice and Proposal generators
+✓ Voice input support
+✓ Multiple export options (PDF, HTML, Email, Word)
+✓ Real-time preview
+
+═══════════════════════════════════════════════════════════════════════════════
+-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartPro - Document Generator</title>
+    <title>SmartPro - Document Generator v1.3</title>
     <style>
         * {
             margin: 0;
@@ -27,6 +70,7 @@
             text-align: center;
             color: white;
             margin-bottom: 30px;
+            position: relative;
         }
 
         .header h1 {
@@ -38,6 +82,17 @@
         .header p {
             font-size: 1.2em;
             opacity: 0.9;
+        }
+
+        .version-tag {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
         }
 
         .doc-type-selector {
@@ -670,6 +725,7 @@
 <body>
     <div class="container">
         <div class="header">
+            <span class="version-tag">v1.3</span>
             <h1>📋 SmartPro</h1>
             <p>Intelligent Document Generator - Invoices, Proposals & Change Orders</p>
         </div>
@@ -1917,7 +1973,7 @@
                 preview.innerHTML = originalContent;
                 
                 html2canvas(preview, {
-                    scale: 1.5, // Reduced from 2 for smaller file and better fit
+                    scale: 1.5,
                     useCORS: true,
                     logging: false,
                     windowHeight: preview.scrollHeight
@@ -1928,19 +1984,36 @@
                     // Letter size dimensions
                     const pageWidth = 215.9;
                     const pageHeight = 279.4;
-                    const margin = 12.7; // 0.5 inch margins (reduced from 1 inch for more space)
+                    const margin = 12.7; // 0.5 inch margins
                     const contentWidth = pageWidth - (2 * margin);
                     const contentHeight = pageHeight - (2 * margin);
                     
-                    const imgWidth = contentWidth;
-                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    // Calculate image dimensions at current scale
+                    let imgWidth = contentWidth;
+                    let imgHeight = (canvas.height * imgWidth) / canvas.width;
                     
-                    // Check if content fits on one page (with small buffer)
-                    if (imgHeight <= contentHeight * 1.02) {
-                        // Content fits on one page - just add it
+                    // SMART FITTING: If content is close to fitting on one page (within 30%), 
+                    // scale it down to fit rather than splitting across two pages
+                    if (imgHeight > contentHeight && imgHeight <= contentHeight * 1.30) {
+                        // Content is 0-30% too tall - scale it down to fit on one page
+                        const scaleFactor = contentHeight / imgHeight;
+                        imgHeight = contentHeight;
+                        imgWidth = imgWidth * scaleFactor;
+                        
+                        // Center horizontally if scaled down
+                        const xOffset = (contentWidth - imgWidth) / 2;
+                        pdf.addImage(imgData, 'PNG', margin + xOffset, margin, imgWidth, imgHeight);
+                        
+                        console.log('PDF: Content scaled to fit on single page');
+                    } 
+                    else if (imgHeight <= contentHeight) {
+                        // Content easily fits on one page
                         pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
-                    } else {
-                        // Content needs multiple pages - use corrected positioning
+                        
+                        console.log('PDF: Content fits on single page');
+                    } 
+                    else {
+                        // Content is significantly longer - needs multiple pages
                         let yPosition = 0;
                         let heightRemaining = imgHeight;
                         
@@ -1948,13 +2021,15 @@
                         pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
                         heightRemaining -= contentHeight;
                         
-                        // Add subsequent pages with correct negative offset
+                        // Add subsequent pages
                         while (heightRemaining > 0) {
                             yPosition -= contentHeight;
                             pdf.addPage();
                             pdf.addImage(imgData, 'PNG', margin, margin + yPosition, imgWidth, imgHeight);
                             heightRemaining -= contentHeight;
                         }
+                        
+                        console.log('PDF: Content spans multiple pages');
                     }
                     
                     // Download the PDF
