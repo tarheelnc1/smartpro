@@ -6,6 +6,15 @@
 ║                            VERSION HISTORY                                   ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
+Version 2.3.1 - January 13, 2026 (Hotfix)
+─────────────────────────────────────────────────────────────────────────────
+✓ FIXED: Download PDF error (PNG corruption issue)
+  - Preview panel is now hidden by default (v2.3 change)
+  - html2canvas can't capture hidden elements
+  - Now temporarily shows preview panel during PDF generation
+  - Hides it again after capture (seamless to user)
+  - PDF generation now works perfectly!
+
 Version 2.3 - January 13, 2026
 ─────────────────────────────────────────────────────────────────────────────
 ✓ FIXED: Complete mobile overflow/scrolling issues across all pages
@@ -102,7 +111,7 @@ Version 1.0 - [Original Release]
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartPro - Document Generator v2.3</title>
+    <title>SmartPro - Document Generator v2.3.1</title>
     
     <!-- Modern Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -911,7 +920,7 @@ Version 1.0 - [Original Release]
 <body>
     <div class="container">
         <div class="header">
-            <span class="version-tag">v2.3</span>
+            <span class="version-tag">v2.3.1</span>
             <h1>📋 SmartPro</h1>
             <p>Professional Document Generator - Modern & Intelligent</p>
         </div>
@@ -2335,6 +2344,7 @@ Version 1.0 - [Original Release]
         
         function exportPDF() {
             const preview = document.getElementById('preview');
+            const previewPanel = document.getElementById('previewPanel');
             const docType = documentType === 'invoice' ? 'Invoice' : (proposalData.documentType === 'proposal' ? 'Proposal' : 'Change Order');
             const client = documentType === 'invoice' ? invoiceData.client : proposalData.client;
             const invoiceNum = documentType === 'invoice' ? invoiceData.invoiceNumber : '';
@@ -2343,6 +2353,12 @@ Version 1.0 - [Original Release]
             const filename = documentType === 'invoice' 
                 ? `Invoice_${invoiceNum}_${client.replace(/\s+/g, '_')}.pdf`
                 : `${docType}_${client.replace(/\s+/g, '_')}.pdf`;
+            
+            // IMPORTANT: Temporarily show preview panel if it's hidden (needed for html2canvas)
+            const wasHidden = !previewPanel.classList.contains('show-mobile-preview');
+            if (wasHidden) {
+                previewPanel.classList.add('show-mobile-preview');
+            }
             
             // Show loading message
             const originalContent = preview.innerHTML;
@@ -2375,6 +2391,11 @@ Version 1.0 - [Original Release]
                         preview.style.width = originalWidth;
                         preview.style.maxWidth = originalMaxWidth;
                         preview.style.minWidth = originalMinWidth;
+                        
+                        // Hide preview panel again if it was hidden before
+                        if (wasHidden) {
+                            previewPanel.classList.remove('show-mobile-preview');
+                        }
                         
                         const imgData = canvas.toDataURL('image/png');
                         const pdf = new jspdf.jsPDF('p', 'mm', 'letter');
@@ -2444,6 +2465,11 @@ Version 1.0 - [Original Release]
                         preview.style.width = originalWidth;
                         preview.style.maxWidth = originalMaxWidth;
                         preview.style.minWidth = originalMinWidth;
+                        
+                        // Hide preview panel again if it was hidden before
+                        if (wasHidden) {
+                            previewPanel.classList.remove('show-mobile-preview');
+                        }
                         
                         console.error('PDF generation error:', error);
                         alert('Error generating PDF. Please try using Print to PDF instead (Ctrl+P).');
@@ -2577,7 +2603,8 @@ ${preview.innerHTML}
         }
         
         // Verify file loaded correctly
-        console.log('✅ SmartPro v2.3 loaded successfully!');
+        console.log('✅ SmartPro v2.3.1 loaded successfully!');
+        console.log('🐛 HOTFIX: PDF download now works with hidden preview');
         console.log('📱 No horizontal scrolling - All pages fixed!');
         console.log('🔄 New invoice review flow - Review before export');
         console.log('👁️ Preview hidden by default - Toggle to show');
