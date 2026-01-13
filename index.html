@@ -1917,7 +1917,7 @@
                 preview.innerHTML = originalContent;
                 
                 html2canvas(preview, {
-                    scale: 2,
+                    scale: 1.5, // Reduced from 2 for smaller file and better fit
                     useCORS: true,
                     logging: false,
                     windowHeight: preview.scrollHeight
@@ -1925,29 +1925,36 @@
                     const imgData = canvas.toDataURL('image/png');
                     const pdf = new jspdf.jsPDF('p', 'mm', 'letter');
                     
-                    // Letter size with 1 inch margins
-                    const pageWidth = 215.9; // Letter width in mm
-                    const pageHeight = 279.4; // Letter height in mm
-                    const margin = 25.4; // 1 inch in mm
+                    // Letter size dimensions
+                    const pageWidth = 215.9;
+                    const pageHeight = 279.4;
+                    const margin = 12.7; // 0.5 inch margins (reduced from 1 inch for more space)
                     const contentWidth = pageWidth - (2 * margin);
                     const contentHeight = pageHeight - (2 * margin);
                     
                     const imgWidth = contentWidth;
                     const imgHeight = (canvas.height * imgWidth) / canvas.width;
                     
-                    let heightLeft = imgHeight;
-                    let position = 0;
-                    
-                    // Add first page with margins
-                    pdf.addImage(imgData, 'PNG', margin, margin + position, imgWidth, imgHeight);
-                    heightLeft -= contentHeight;
-                    
-                    // Add new pages if content is longer than one page
-                    while (heightLeft > 0) {
-                        position = -(imgHeight - heightLeft);
-                        pdf.addPage();
-                        pdf.addImage(imgData, 'PNG', margin, margin + position, imgWidth, imgHeight);
-                        heightLeft -= contentHeight;
+                    // Check if content fits on one page (with small buffer)
+                    if (imgHeight <= contentHeight * 1.02) {
+                        // Content fits on one page - just add it
+                        pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+                    } else {
+                        // Content needs multiple pages - use corrected positioning
+                        let yPosition = 0;
+                        let heightRemaining = imgHeight;
+                        
+                        // Add first page
+                        pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
+                        heightRemaining -= contentHeight;
+                        
+                        // Add subsequent pages with correct negative offset
+                        while (heightRemaining > 0) {
+                            yPosition -= contentHeight;
+                            pdf.addPage();
+                            pdf.addImage(imgData, 'PNG', margin, margin + yPosition, imgWidth, imgHeight);
+                            heightRemaining -= contentHeight;
+                        }
                     }
                     
                     // Download the PDF
