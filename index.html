@@ -6,6 +6,25 @@
 ║                            VERSION HISTORY                                   ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
+Version 2.3.3 - January 13, 2026
+─────────────────────────────────────────────────────────────────────────────
+✓ UPDATED: Company name changed to "D GISS Construction II LLC"
+  - Updated in invoice review screen
+  - Updated in invoice preview
+  - Updated in proposal preview
+  - Now includes LLC designation
+
+Version 2.3.2 - January 13, 2026 (Mobile & Desktop PDF Fix)
+─────────────────────────────────────────────────────────────────────────────
+✓ FIXED: PDFs looking "scrunched up" on BOTH mobile AND desktop
+  - Preview panel hidden by default (v2.3) caused rendering issues
+  - Mobile CSS was applying constraints during capture
+  - Desktop rendering also affected when preview panel was constrained
+  - Added force-desktop-render class to BOTH preview and previewPanel
+  - Forces full 800px desktop layout during PDF generation
+  - Mobile CSS excluded via :not(.force-desktop-render) selector
+  - PDFs now look perfect on ALL devices - mobile and desktop!
+
 Version 2.3.1 - January 13, 2026 (Hotfix)
 ─────────────────────────────────────────────────────────────────────────────
 ✓ FIXED: Download PDF error (PNG corruption issue)
@@ -111,7 +130,7 @@ Version 1.0 - [Original Release]
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartPro - Document Generator v2.3.1</title>
+    <title>SmartPro - Document Generator v2.3.3</title>
     
     <!-- Modern Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -407,6 +426,30 @@ Version 1.0 - [Original Release]
         
         #previewPanel.show-mobile-preview {
             display: block;
+        }
+        
+        /* Force desktop rendering for PDF generation */
+        #previewPanel.force-desktop-render,
+        #preview.force-desktop-render {
+            min-width: 800px !important;
+            max-width: 800px !important;
+            width: 800px !important;
+        }
+        
+        #preview.force-desktop-render * {
+            max-width: none !important;
+        }
+        
+        #preview.force-desktop-render .invoice-container {
+            max-width: 800px !important;
+            width: 800px !important;
+        }
+        
+        #preview.force-desktop-render table {
+            display: table !important;
+            width: 100% !important;
+            overflow-x: visible !important;
+            white-space: normal !important;
         }
         
         /* Mobile-specific preview toggle button styling */
@@ -847,15 +890,15 @@ Version 1.0 - [Original Release]
                 max-width: 100%;
             }
             
-            /* Fix preview content overflow */
-            #preview,
-            #preview * {
+            /* Fix preview content overflow - EXCEPT when generating PDF */
+            #preview:not(.force-desktop-render),
+            #preview:not(.force-desktop-render) * {
                 max-width: 100% !important;
                 overflow-x: auto;
                 word-wrap: break-word;
             }
             
-            #preview table {
+            #preview:not(.force-desktop-render) table {
                 display: block;
                 overflow-x: auto;
                 white-space: nowrap;
@@ -920,7 +963,7 @@ Version 1.0 - [Original Release]
 <body>
     <div class="container">
         <div class="header">
-            <span class="version-tag">v2.3.1</span>
+            <span class="version-tag">v2.3.3</span>
             <h1>📋 SmartPro</h1>
             <p>Professional Document Generator - Modern & Intelligent</p>
         </div>
@@ -1455,7 +1498,7 @@ Version 1.0 - [Original Release]
                         
                         <div class="review-invoice-container">
                             <div class="review-invoice-header">
-                                <div class="review-company-name">D GISS Construction II</div>
+                                <div class="review-company-name">D GISS Construction II LLC</div>
                                 <div style="color: #666; font-size: 0.9em;">
                                     43 Warner Ave<br>
                                     West Haven, CT 06516<br>
@@ -1708,7 +1751,7 @@ Version 1.0 - [Original Release]
                     <div class="invoice-header-section">
                         <div class="invoice-top">
                             <div class="invoice-top-left">
-                                <div class="company-name">D GISS Construction II</div>
+                                <div class="company-name">D GISS Construction II LLC</div>
                                 <div class="company-details">
                                     43 Warner Ave<br>
                                     West Haven, CT 06516<br>
@@ -2181,7 +2224,7 @@ Version 1.0 - [Original Release]
                 </style>
                 
                 <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #333;">
-                    <h3 style="margin: 0; font-size: 1.2em;">D GISS Construction II</h3>
+                    <h3 style="margin: 0; font-size: 1.2em;">D GISS Construction II LLC</h3>
                     <p style="margin: 3px 0; font-size: 0.9em;">43 Warner Ave, West Haven, CT 06516</p>
                     <p style="margin: 3px 0; font-size: 0.9em;">(203) 997-6542 | HIC# 0663546</p>
                 </div>
@@ -2360,6 +2403,10 @@ Version 1.0 - [Original Release]
                 previewPanel.classList.add('show-mobile-preview');
             }
             
+            // Add force-desktop-render class to BOTH panel and preview to override mobile CSS
+            preview.classList.add('force-desktop-render');
+            previewPanel.classList.add('force-desktop-render');
+            
             // Show loading message
             const originalContent = preview.innerHTML;
             preview.innerHTML = '<p style="text-align: center; padding: 50px; color: #667eea; font-size: 1.2em;">📄 Generating PDF... Please wait...</p>';
@@ -2387,10 +2434,12 @@ Version 1.0 - [Original Release]
                         windowHeight: preview.scrollHeight,
                         windowWidth: 800 // Match our forced width
                     }).then(canvas => {
-                        // Restore original width immediately
+                        // Restore original styles
                         preview.style.width = originalWidth;
                         preview.style.maxWidth = originalMaxWidth;
                         preview.style.minWidth = originalMinWidth;
+                        preview.classList.remove('force-desktop-render');
+                        previewPanel.classList.remove('force-desktop-render');
                         
                         // Hide preview panel again if it was hidden before
                         if (wasHidden) {
@@ -2461,10 +2510,12 @@ Version 1.0 - [Original Release]
                             preview.innerHTML = successMsg;
                         }, 2000);
                     }).catch(error => {
-                        // Restore width on error too
+                        // Restore styles on error too
                         preview.style.width = originalWidth;
                         preview.style.maxWidth = originalMaxWidth;
                         preview.style.minWidth = originalMinWidth;
+                        preview.classList.remove('force-desktop-render');
+                        previewPanel.classList.remove('force-desktop-render');
                         
                         // Hide preview panel again if it was hidden before
                         if (wasHidden) {
@@ -2603,8 +2654,8 @@ ${preview.innerHTML}
         }
         
         // Verify file loaded correctly
-        console.log('✅ SmartPro v2.3.1 loaded successfully!');
-        console.log('🐛 HOTFIX: PDF download now works with hidden preview');
+        console.log('✅ SmartPro v2.3.2 loaded successfully!');
+        console.log('🐛 FIXED: PDFs perfect on BOTH mobile AND desktop!');
         console.log('📱 No horizontal scrolling - All pages fixed!');
         console.log('🔄 New invoice review flow - Review before export');
         console.log('👁️ Preview hidden by default - Toggle to show');
