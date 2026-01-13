@@ -6,6 +6,16 @@
 ║                            VERSION HISTORY                                   ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
+Version 2.2 - January 13, 2026
+─────────────────────────────────────────────────────────────────────────────
+✓ FIXED: Mobile responsiveness - no more horizontal scrolling
+  - Preview panel now hidden by default on mobile (< 768px)
+  - Added "👁️ Show/Hide Preview" toggle button (mobile only)
+  - Input panel takes full width on mobile
+  - Better spacing and padding for small screens
+  - Smooth scroll to preview when toggled open
+  - Much better mobile UX - no scrolling needed!
+
 Version 2.1 - January 13, 2026
 ─────────────────────────────────────────────────────────────────────────────
 ✓ ADDED: Edit line items feature in invoice step 2
@@ -74,7 +84,7 @@ Version 1.0 - [Original Release]
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartPro - Document Generator v2.1</title>
+    <title>SmartPro - Document Generator v2.2</title>
     
     <!-- Modern Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -344,6 +354,34 @@ Version 1.0 - [Original Release]
             .main-content {
                 grid-template-columns: 1fr;
             }
+            
+            /* On mobile, preview comes after input */
+            .panel:last-child {
+                margin-top: var(--spacing-lg);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            /* Hide preview panel by default on mobile to save space */
+            .preview-panel {
+                display: none;
+            }
+            
+            .preview-panel.show-mobile {
+                display: block;
+            }
+            
+            /* Add toggle button for mobile preview */
+            .mobile-preview-toggle {
+                display: block;
+                width: 100%;
+                margin-bottom: var(--spacing-md);
+            }
+        }
+        
+        /* Hide mobile toggle on desktop */
+        .mobile-preview-toggle {
+            display: none;
         }
 
         .panel {
@@ -767,6 +805,28 @@ Version 1.0 - [Original Release]
                 height: 32px;
                 font-size: 0.875rem;
             }
+            
+            /* Mobile: Hide preview panel by default, show toggle button */
+            .panel:last-child {
+                display: none;
+            }
+            
+            .panel:last-child.show-mobile-preview {
+                display: block;
+                margin-top: var(--spacing-lg);
+            }
+            
+            .mobile-preview-toggle {
+                display: block !important;
+                width: 100%;
+                margin-top: var(--spacing-md);
+            }
+            
+            /* Ensure input panel takes full width */
+            .panel:first-child {
+                width: 100%;
+                max-width: 100%;
+            }
         }
 
         /* Print Styles */
@@ -819,7 +879,7 @@ Version 1.0 - [Original Release]
 <body>
     <div class="container">
         <div class="header">
-            <span class="version-tag">v2.1</span>
+            <span class="version-tag">v2.2</span>
             <h1>📋 SmartPro</h1>
             <p>Professional Document Generator - Modern & Intelligent</p>
         </div>
@@ -855,10 +915,15 @@ Version 1.0 - [Original Release]
                 <div id="inputContainer">
                     <!-- Questions will be dynamically loaded here -->
                 </div>
+                
+                <!-- Mobile Preview Toggle Button -->
+                <button class="btn btn-secondary mobile-preview-toggle" onclick="toggleMobilePreview()">
+                    👁️ Show/Hide Preview
+                </button>
             </div>
 
             <!-- Preview Panel -->
-            <div class="panel glass-panel">
+            <div class="panel glass-panel" id="previewPanel">
                 <h2>👁️ Live Preview</h2>
                 <div class="button-group">
                     <button class="btn btn-success" onclick="printToPDF()">🖨️ Print to PDF</button>
@@ -2317,6 +2382,16 @@ ${preview.innerHTML}
             });
         }
 
+        function toggleMobilePreview() {
+            const previewPanel = document.getElementById('previewPanel');
+            previewPanel.classList.toggle('show-mobile-preview');
+            
+            // Scroll to preview if showing
+            if (previewPanel.classList.contains('show-mobile-preview')) {
+                previewPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
         function startOver() {
             if (confirm('Start over? All data will be lost.')) {
                 location.reload();
@@ -2324,7 +2399,8 @@ ${preview.innerHTML}
         }
         
         // Verify file loaded correctly
-        console.log('✅ SmartPro v2.1 loaded successfully!');
+        console.log('✅ SmartPro v2.2 loaded successfully!');
+        console.log('📱 Mobile responsive - Preview toggle added');
         console.log('📝 Features: Edit line items, Modern UI, PDF export');
     </script>
 </body>
