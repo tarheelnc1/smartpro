@@ -6,6 +6,36 @@
 ║                            VERSION HISTORY                                   ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 
+Version 2.4.1 - January 13, 2026 (Critical PDF Fix)
+─────────────────────────────────────────────────────────────────────────────
+✓ FIXED: PDF content cut off on right side (desktop & mobile)
+  - Issue: "INVOICE" became "INVOI", amounts truncated
+  - Root cause: Layout not fully calculated before html2canvas capture
+  - Enhanced force-desktop-render with more specific width rules
+  - Added table-layout: fixed for consistent table rendering
+  - Added overflow: visible to prevent content clipping
+  - Added void preview.offsetHeight to force layout recalculation
+  - Increased html2canvas scale from 1.5 to 2 for better quality
+  - Increased setTimeout values: 100ms → 200ms, 100ms → 300ms
+  - Added backgroundColor: '#ffffff' to html2canvas
+  - Now PDFs render with FULL content visible!
+
+Version 2.4.0 - January 13, 2026 (Major Feature)
+─────────────────────────────────────────────────────────────────────────────
+✓ NEW: Company Settings - Edit Business Info On The Fly!
+  - Added "⚙️ Company Settings" button in header
+  - Edit company name, address, phone, HIC# anytime
+  - Settings saved to localStorage (persists between sessions)
+  - All documents (invoices, proposals) use dynamic company info
+  - Changes apply immediately to all previews
+  - Beautiful modal interface with glassmorphism design
+  - Default values: "D GISS Construction II LLC"
+✓ UPDATED: All preview functions now use dynamic company info
+  - Invoice preview uses getCompanyInfo()
+  - Invoice review screen uses getCompanyInfo()
+  - Proposal/Change Order preview uses getCompanyInfo()
+  - No more hardcoded company information!
+
 Version 2.3.3 - January 13, 2026
 ─────────────────────────────────────────────────────────────────────────────
 ✓ UPDATED: Company name changed to "D GISS Construction II LLC"
@@ -130,7 +160,7 @@ Version 1.0 - [Original Release]
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartPro - Document Generator v2.3.3</title>
+    <title>SmartPro - Document Generator v2.4.1</title>
     
     <!-- Modern Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -436,18 +466,24 @@ Version 1.0 - [Original Release]
             width: 800px !important;
         }
         
-        #preview.force-desktop-render * {
+        #preview.force-desktop-render *,
+        #preview.force-desktop-render .invoice-container,
+        #preview.force-desktop-render .invoice-top,
+        #preview.force-desktop-render .line-items-table {
             max-width: none !important;
+            box-sizing: border-box !important;
         }
         
         #preview.force-desktop-render .invoice-container {
             max-width: 800px !important;
             width: 800px !important;
+            min-width: 800px !important;
         }
         
         #preview.force-desktop-render table {
             display: table !important;
             width: 100% !important;
+            table-layout: fixed !important;
             overflow-x: visible !important;
             white-space: normal !important;
         }
@@ -958,14 +994,130 @@ Version 1.0 - [Original Release]
             border-top-color: white;
             animation: spin 0.8s linear infinite;
         }
+        
+        /* Settings Button */
+        .settings-btn {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all var(--transition-base);
+            cursor: pointer;
+            color: white;
+        }
+        
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.35);
+            transform: scale(1.05);
+        }
+        
+        /* Settings Modal */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .settings-modal.show {
+            display: flex;
+        }
+        
+        .settings-content {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 24px;
+            padding: var(--spacing-xl);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--glass-shadow);
+            border: 1px solid var(--glass-border);
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .settings-content h2 {
+            font-family: 'Outfit', sans-serif;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-lg);
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <span class="version-tag">v2.3.3</span>
+            <button class="settings-btn" onclick="openSettings()">⚙️ Company Settings</button>
+            <span class="version-tag">v2.4.1</span>
             <h1>📋 SmartPro</h1>
             <p>Professional Document Generator - Modern & Intelligent</p>
+        </div>
+        
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="settings-modal">
+            <div class="settings-content">
+                <h2>⚙️ Company Settings</h2>
+                
+                <div class="input-group">
+                    <label>Company Name:</label>
+                    <input type="text" id="companyName" placeholder="D GISS Construction II LLC">
+                </div>
+                
+                <div class="input-group">
+                    <label>Address Line 1:</label>
+                    <input type="text" id="companyAddress1" placeholder="43 Warner Ave">
+                </div>
+                
+                <div class="input-group">
+                    <label>Address Line 2:</label>
+                    <input type="text" id="companyAddress2" placeholder="West Haven, CT 06516">
+                </div>
+                
+                <div class="input-group">
+                    <label>Phone Number:</label>
+                    <input type="text" id="companyPhone" placeholder="(203) 997-6542">
+                </div>
+                
+                <div class="input-group">
+                    <label>License/HIC Number:</label>
+                    <input type="text" id="companyHIC" placeholder="HIC# 0663546">
+                </div>
+                
+                <div class="button-group" style="flex-direction: row; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-success" onclick="saveSettings()" style="flex: 1;">
+                        ✓ Save Settings
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeSettings()" style="flex: 1;">
+                        Cancel
+                    </button>
+                </div>
+            </div>
         </div>
 
         <div id="docTypeSelector" class="doc-type-selector glass-panel">
@@ -1066,6 +1218,71 @@ Version 1.0 - [Original Release]
             recognition.continuous = false;
             recognition.interimResults = false;
             recognition.lang = 'en-US';
+        }
+
+        // ========== COMPANY SETTINGS ==========
+        
+        // Default company information
+        const defaultCompanyInfo = {
+            name: 'D GISS Construction II LLC',
+            address1: '43 Warner Ave',
+            address2: 'West Haven, CT 06516',
+            phone: '(203) 997-6542',
+            hic: 'HIC# 0663546'
+        };
+        
+        // Load company settings from localStorage
+        function getCompanyInfo() {
+            const saved = localStorage.getItem('companyInfo');
+            if (saved) {
+                return JSON.parse(saved);
+            }
+            return defaultCompanyInfo;
+        }
+        
+        // Save company settings to localStorage
+        function setCompanyInfo(info) {
+            localStorage.setItem('companyInfo', JSON.stringify(info));
+        }
+        
+        // Open settings modal
+        function openSettings() {
+            const company = getCompanyInfo();
+            document.getElementById('companyName').value = company.name;
+            document.getElementById('companyAddress1').value = company.address1;
+            document.getElementById('companyAddress2').value = company.address2;
+            document.getElementById('companyPhone').value = company.phone;
+            document.getElementById('companyHIC').value = company.hic;
+            document.getElementById('settingsModal').classList.add('show');
+        }
+        
+        // Close settings modal
+        function closeSettings() {
+            document.getElementById('settingsModal').classList.remove('show');
+        }
+        
+        // Save settings and close modal
+        function saveSettings() {
+            const company = {
+                name: document.getElementById('companyName').value || defaultCompanyInfo.name,
+                address1: document.getElementById('companyAddress1').value || defaultCompanyInfo.address1,
+                address2: document.getElementById('companyAddress2').value || defaultCompanyInfo.address2,
+                phone: document.getElementById('companyPhone').value || defaultCompanyInfo.phone,
+                hic: document.getElementById('companyHIC').value || defaultCompanyInfo.hic
+            };
+            
+            setCompanyInfo(company);
+            closeSettings();
+            
+            // Show success message
+            alert('✅ Company settings saved successfully!');
+            
+            // Update preview if currently visible
+            if (documentType === 'invoice') {
+                updateInvoicePreview();
+            } else if (documentType === 'proposal' || documentType === 'changeorder') {
+                updateProposalPreview();
+            }
         }
 
         // ========== UTILITY FUNCTIONS ==========
@@ -1427,6 +1644,7 @@ Version 1.0 - [Original Release]
             // Show the invoice in the input panel
             const total = invoiceData.lineItems.reduce((sum, item) => sum + item.amount, 0);
             const formattedDate = formatDate(invoiceData.date);
+            const company = getCompanyInfo(); // Load company settings
             
             document.getElementById('inputContainer').innerHTML = `
                 <div class="question-box">
@@ -1498,12 +1716,12 @@ Version 1.0 - [Original Release]
                         
                         <div class="review-invoice-container">
                             <div class="review-invoice-header">
-                                <div class="review-company-name">D GISS Construction II LLC</div>
+                                <div class="review-company-name">${company.name}</div>
                                 <div style="color: #666; font-size: 0.9em;">
-                                    43 Warner Ave<br>
-                                    West Haven, CT 06516<br>
-                                    (203) 997-6542<br>
-                                    HIC# 0663546
+                                    ${company.address1}<br>
+                                    ${company.address2}<br>
+                                    ${company.phone}<br>
+                                    ${company.hic}
                                 </div>
                                 <div class="review-invoice-title">INVOICE</div>
                             </div>
@@ -1606,6 +1824,7 @@ Version 1.0 - [Original Release]
             const preview = document.getElementById('preview');
             const total = invoiceData.lineItems.reduce((sum, item) => sum + item.amount, 0);
             const formattedDate = formatDate(invoiceData.date);
+            const company = getCompanyInfo(); // Load company settings
             
             preview.innerHTML = `
                 <style>
@@ -1751,12 +1970,12 @@ Version 1.0 - [Original Release]
                     <div class="invoice-header-section">
                         <div class="invoice-top">
                             <div class="invoice-top-left">
-                                <div class="company-name">D GISS Construction II LLC</div>
+                                <div class="company-name">${company.name}</div>
                                 <div class="company-details">
-                                    43 Warner Ave<br>
-                                    West Haven, CT 06516<br>
-                                    (203) 997-6542<br>
-                                    HIC# 0663546
+                                    ${company.address1}<br>
+                                    ${company.address2}<br>
+                                    ${company.phone}<br>
+                                    ${company.hic}
                                 </div>
                             </div>
                             <div class="invoice-top-right">
@@ -2195,6 +2414,7 @@ Version 1.0 - [Original Release]
         function updateProposalPreview() {
             const preview = document.getElementById('preview');
             const docTitle = proposalData.proposalTitle || (proposalData.documentType === 'proposal' ? 'Repairs & Painting' : 'Change Order - Repairs & Painting');
+            const company = getCompanyInfo(); // Load company settings
             
             const sectionsTotal = proposalData.sections.reduce((sum, s) => sum + s.total, 0);
             const invoiceTotal = sectionsTotal + proposalData.dumpsterFee + proposalData.permitFee + proposalData.gcFee;
@@ -2224,9 +2444,9 @@ Version 1.0 - [Original Release]
                 </style>
                 
                 <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #333;">
-                    <h3 style="margin: 0; font-size: 1.2em;">D GISS Construction II LLC</h3>
-                    <p style="margin: 3px 0; font-size: 0.9em;">43 Warner Ave, West Haven, CT 06516</p>
-                    <p style="margin: 3px 0; font-size: 0.9em;">(203) 997-6542 | HIC# 0663546</p>
+                    <h3 style="margin: 0; font-size: 1.2em;">${company.name}</h3>
+                    <p style="margin: 3px 0; font-size: 0.9em;">${company.address1}, ${company.address2}</p>
+                    <p style="margin: 3px 0; font-size: 0.9em;">${company.phone} | ${company.hic}</p>
                 </div>
                 
                 <h1 style="text-align: center; margin: 15px 0; font-size: 1.5em;"><strong>${docTitle}</strong></h1>
@@ -2419,25 +2639,32 @@ Version 1.0 - [Original Release]
                 const originalWidth = preview.style.width;
                 const originalMaxWidth = preview.style.maxWidth;
                 const originalMinWidth = preview.style.minWidth;
+                const originalOverflow = preview.style.overflow;
                 
                 // Force desktop-like width (800px standard document width)
                 preview.style.width = '800px';
                 preview.style.maxWidth = '800px';
                 preview.style.minWidth = '800px';
+                preview.style.overflow = 'visible';
                 
-                // Wait a moment for reflow
+                // Force layout recalculation
+                void preview.offsetHeight;
+                
+                // Wait longer for reflow to complete
                 setTimeout(() => {
                     html2canvas(preview, {
-                        scale: 1.5,
+                        scale: 2, // Increased from 1.5 for better quality
                         useCORS: true,
                         logging: false,
                         windowHeight: preview.scrollHeight,
-                        windowWidth: 800 // Match our forced width
+                        windowWidth: 800, // Match our forced width
+                        backgroundColor: '#ffffff'
                     }).then(canvas => {
                         // Restore original styles
                         preview.style.width = originalWidth;
                         preview.style.maxWidth = originalMaxWidth;
                         preview.style.minWidth = originalMinWidth;
+                        preview.style.overflow = originalOverflow;
                         preview.classList.remove('force-desktop-render');
                         previewPanel.classList.remove('force-desktop-render');
                         
@@ -2514,6 +2741,7 @@ Version 1.0 - [Original Release]
                         preview.style.width = originalWidth;
                         preview.style.maxWidth = originalMaxWidth;
                         preview.style.minWidth = originalMinWidth;
+                        preview.style.overflow = originalOverflow;
                         preview.classList.remove('force-desktop-render');
                         previewPanel.classList.remove('force-desktop-render');
                         
@@ -2526,8 +2754,8 @@ Version 1.0 - [Original Release]
                         alert('Error generating PDF. Please try using Print to PDF instead (Ctrl+P).');
                         preview.innerHTML = originalContent;
                     });
-                }, 100); // Wait for reflow
-            }, 100);
+                }, 300); // Increased wait for reflow - was 100
+            }, 200); // Increased initial wait - was 100
         }
 
         function saveLocally() {
@@ -2654,11 +2882,11 @@ ${preview.innerHTML}
         }
         
         // Verify file loaded correctly
-        console.log('✅ SmartPro v2.3.2 loaded successfully!');
-        console.log('🐛 FIXED: PDFs perfect on BOTH mobile AND desktop!');
-        console.log('📱 No horizontal scrolling - All pages fixed!');
-        console.log('🔄 New invoice review flow - Review before export');
-        console.log('👁️ Preview hidden by default - Toggle to show');
+        console.log('✅ SmartPro v2.4.1 loaded successfully!');
+        console.log('🐛 CRITICAL FIX: PDF content no longer cut off!');
+        console.log('📄 Full "INVOICE" text and amounts now visible');
+        console.log('⚙️ Company Settings available - click to customize');
+        console.log('💾 Settings saved to localStorage');
     </script>
 </body>
 </html>
