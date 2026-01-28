@@ -1,226 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<!--
-╔══════════════════════════════════════════════════════════════════════════════╗
-║                      SmartPro - Document Generator                           ║
-║                            VERSION HISTORY                                   ║
-╚══════════════════════════════════════════════════════════════════════════════╝
-
-Version 2.4.2 - January 13, 2026 (Complete PDF Rewrite)
-─────────────────────────────────────────────────────────────────────────────
-✓ FIXED: PDF content STILL being cut off despite v2.4.1 fixes
-  - Issue: Preview looked fine but PDF export still showed "INVOI", "$1,5"
-  - Root cause: Parent container constraints affecting html2canvas
-  - COMPLETE REWRITE of exportPDF function using new approach:
-    * Creates temporary off-screen container
-    * Absolutely positioned at left: -9999px
-    * Explicitly set to 800px width with no parent constraints
-    * Clones preview content into temporary container
-    * Captures from temporary container
-    * Removes temporary container after capture
-  - Simplified approach - no more complex CSS class toggling
-  - Added explicit width/height parameters to html2canvas
-  - This MUST work - temp container has zero constraints!
-
-Version 2.4.1 - January 13, 2026 (Critical PDF Fix)
-─────────────────────────────────────────────────────────────────────────────
-✓ FIXED: PDF content cut off on right side (desktop & mobile)
-  - Issue: "INVOICE" became "INVOI", amounts truncated
-  - Root cause: Layout not fully calculated before html2canvas capture
-  - Enhanced force-desktop-render with more specific width rules
-  - Added table-layout: fixed for consistent table rendering
-  - Added overflow: visible to prevent content clipping
-  - Added void preview.offsetHeight to force layout recalculation
-  - Increased html2canvas scale from 1.5 to 2 for better quality
-  - Increased setTimeout values: 100ms → 200ms, 100ms → 300ms
-  - Added backgroundColor: '#ffffff' to html2canvas
-  - Now PDFs render with FULL content visible!
-
-Version 2.4.0 - January 13, 2026 (Major Feature)
-─────────────────────────────────────────────────────────────────────────────
-✓ NEW: Company Settings - Edit Business Info On The Fly!
-  - Added "⚙️ Company Settings" button in header
-  - Edit company name, address, phone, HIC# anytime
-  - Settings saved to localStorage (persists between sessions)
-  - All documents (invoices, proposals) use dynamic company info
-  - Changes apply immediately to all previews
-  - Beautiful modal interface with glassmorphism design
-  - Default values: "D GISS Construction II LLC"
-✓ UPDATED: All preview functions now use dynamic company info
-  - Invoice preview uses getCompanyInfo()
-  - Invoice review screen uses getCompanyInfo()
-  - Proposal/Change Order preview uses getCompanyInfo()
-  - No more hardcoded company information!
-
-Version 2.3.3 - January 13, 2026
-─────────────────────────────────────────────────────────────────────────────
-✓ UPDATED: Company name changed to "D GISS Construction II LLC"
-  - Updated in invoice review screen
-  - Updated in invoice preview
-  - Updated in proposal preview
-  - Now includes LLC designation
-
-Version 2.3.2 - January 13, 2026 (Mobile & Desktop PDF Fix)
-─────────────────────────────────────────────────────────────────────────────
-✓ FIXED: PDFs looking "scrunched up" on BOTH mobile AND desktop
-  - Preview panel hidden by default (v2.3) caused rendering issues
-  - Mobile CSS was applying constraints during capture
-  - Desktop rendering also affected when preview panel was constrained
-  - Added force-desktop-render class to BOTH preview and previewPanel
-  - Forces full 800px desktop layout during PDF generation
-  - Mobile CSS excluded via :not(.force-desktop-render) selector
-  - PDFs now look perfect on ALL devices - mobile and desktop!
-
-Version 2.3.1 - January 13, 2026 (Hotfix)
-─────────────────────────────────────────────────────────────────────────────
-✓ FIXED: Download PDF error (PNG corruption issue)
-  - Preview panel is now hidden by default (v2.3 change)
-  - html2canvas can't capture hidden elements
-  - Now temporarily shows preview panel during PDF generation
-  - Hides it again after capture (seamless to user)
-  - PDF generation now works perfectly!
-
-Version 2.3 - January 13, 2026
-─────────────────────────────────────────────────────────────────────────────
-✓ FIXED: Complete mobile overflow/scrolling issues across all pages
-  - Added max-width: 100vw to body to prevent horizontal scrolling
-  - All elements now respect viewport width with overflow protection
-  - Fixed preview table overflow with auto-scroll for wide content
-  - Better mobile handling for all input forms and buttons
-✓ REDESIGNED: Invoice review flow (major UX improvement!)
-  - Step 3 now shows: Back, Review Invoice, Start Over (cleaner options)
-  - NEW Step 4: Full invoice review with "Looks Good" button
-  - Step 5: Export options (Download PDF, Print PDF, Save, Email, etc.)
-  - Much better workflow - review before committing to export
-✓ CHANGED: Preview panel behavior for ALL devices
-  - Preview now HIDDEN by default on all screen sizes
-  - "👁️ Show/Hide Preview" toggle button visible on all devices
-  - Users choose when to see preview (cleaner, less cluttered)
-  - No auto-showing preview - only when explicitly toggled
-
-Version 2.2 - January 13, 2026
-─────────────────────────────────────────────────────────────────────────────
-✓ FIXED: Mobile responsiveness - no more horizontal scrolling
-  - Preview panel now hidden by default on mobile (< 768px)
-  - Added "👁️ Show/Hide Preview" toggle button (mobile only)
-  - Input panel takes full width on mobile
-  - Better spacing and padding for small screens
-  - Smooth scroll to preview when toggled open
-  - Much better mobile UX - no scrolling needed!
-
-Version 2.1 - January 13, 2026
-─────────────────────────────────────────────────────────────────────────────
-✓ ADDED: Edit line items feature in invoice step 2
-  - Can now edit existing line items instead of only removing them
-  - Edit button (✏️) appears next to each line item
-  - Pre-fills form with existing description and amount
-  - Saves changes back to the same line item position
-  - No need to delete and re-add items anymore!
-
-Version 2.0 - January 13, 2026 - THE MODERN REDESIGN
-─────────────────────────────────────────────────────────────────────────────
-✨ MAJOR VISUAL OVERHAUL - Complete UI/UX Modernization
-  - NEW: Glassmorphism design with frosted glass panels
-  - NEW: Animated mesh gradient background (teal/blue/purple)
-  - NEW: Modern typography (Outfit + Inter font pairing)
-  - NEW: Enhanced color palette (sophisticated teal/cyan theme)
-  - NEW: Smooth animations and micro-interactions throughout
-  - IMPROVED: Mobile responsiveness and user experience
-
-Version 1.4 - January 13, 2026
-─────────────────────────────────────────────────────────────────────────────
-✓ FIXED: Mobile PDF export creating 2 pages while desktop works fine
-  - Mobile devices render preview narrower, making content taller
-  - Now temporarily forces 800px desktop width during PDF capture
-  - Restores original width after capture completes
-  - Both mobile and desktop now produce identical single-page PDFs
-  - Added proper cleanup on error
-
-Version 1.3 - January 13, 2026
-─────────────────────────────────────────────────────────────────────────────
-✓ FIXED: Increased single-page threshold from 15% to 30%
-  - Much more aggressive about keeping content on one page
-  - Content up to 30% too tall will now be scaled to fit
-  - Should eliminate 2-page splits for typical invoices/proposals
-  - Only truly long documents (1.3+ pages worth) will span multiple pages
-
-Version 1.2 - January 13, 2026
-─────────────────────────────────────────────────────────────────────────────
-✓ ENHANCED: Smart PDF fitting algorithm
-  - If content is 0-15% too tall for one page, automatically scales it down
-  - Prevents unnecessary 2-page splits for nearly-fitting content
-  - Centers horizontally when scaling down
-  - Added console logging to show which fitting method was used
-  - Much smarter handling of edge cases where content is "almost" one page
-
-Version 1.1 - January 13, 2026
-─────────────────────────────────────────────────────────────────────────────
-✓ FIXED: PDF export breaking into 2 pages unnecessarily
-  - Reduced image scale from 2x to 1.5x for smaller file size
-  - Reduced margins from 1 inch to 0.5 inch for more content space
-  - Fixed page positioning logic (was using incorrect negative offset)
-  - Added single-page detection with 2% buffer tolerance
-✓ ADDED: Version tracking system
-  - Version badge in UI (top-right)
-  - CHANGELOG.md file
-
-Version 1.0 - [Original Release]
-─────────────────────────────────────────────────────────────────────────────
-✓ Initial release with Invoice and Proposal generators
-✓ Voice input support
-✓ Multiple export options (PDF, HTML, Email, Word)
-✓ Real-time preview
-
-═══════════════════════════════════════════════════════════════════════════════
--->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartPro - Document Generator v2.4.2</title>
-    
-    <!-- Modern Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
+    <title>SmartPro - Document Generator v5.6</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        :root {
-            /* Modern Color Palette */
-            --primary: #06b6d4; /* Cyan */
-            --primary-dark: #0891b2;
-            --secondary: #3b82f6; /* Blue */
-            --accent: #8b5cf6; /* Purple */
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            
-            /* Neutrals */
-            --bg-light: #f8fafc;
-            --bg-glass: rgba(255, 255, 255, 0.7);
-            --bg-glass-dark: rgba(255, 255, 255, 0.5);
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
-            --text-muted: #64748b;
-            --border: rgba(148, 163, 184, 0.2);
-            
-            /* Glass effects */
-            --glass-bg: rgba(255, 255, 255, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-            
-            /* Spacing */
-            --spacing-xs: 0.5rem;
-            --spacing-sm: 1rem;
-            --spacing-md: 1.5rem;
-            --spacing-lg: 2rem;
-            --spacing-xl: 3rem;
-            
-            /* Animations */
-            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -228,367 +14,115 @@ Version 1.0 - [Original Release]
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: var(--spacing-md);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            position: relative;
-            max-width: 100vw;
-        }
-
-        /* Animated Gradient Background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(ellipse at 20% 20%, rgba(6, 182, 212, 0.3) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 60%),
-                linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            animation: gradientShift 15s ease infinite;
-            z-index: -1;
-        }
-
-        @keyframes gradientShift {
-            0%, 100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.9;
-                transform: scale(1.05);
-            }
+            padding: 20px;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Header */
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: var(--spacing-xl);
-            position: relative;
-            animation: slideDown 0.8s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .header h1 {
-            font-family: 'Outfit', sans-serif;
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            font-weight: 800;
-            margin-bottom: var(--spacing-sm);
-            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            letter-spacing: -0.02em;
-        }
-
-        .header p {
-            font-size: clamp(1rem, 2vw, 1.25rem);
-            opacity: 0.95;
-            font-weight: 300;
-            letter-spacing: 0.01em;
-        }
-
-        .version-tag {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all var(--transition-base);
-        }
-
-        .version-tag:hover {
-            background: rgba(255, 255, 255, 0.35);
-            transform: scale(1.05);
-        }
-
-        /* Glassmorphism Panel */
-        .glass-panel {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border-radius: 24px;
-            padding: var(--spacing-xl);
-            box-shadow: var(--glass-shadow);
-            border: 1px solid var(--glass-border);
-            transition: all var(--transition-base);
-            animation: glassAppear 0.6s ease-out backwards;
-        }
-
-        @keyframes glassAppear {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .glass-panel:hover {
-            box-shadow: 0 12px 48px 0 rgba(31, 38, 135, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .doc-type-selector {
-            margin-bottom: var(--spacing-lg);
-            text-align: center;
-            animation-delay: 0.1s;
-        }
-
-        .doc-type-selector h2 {
-            font-family: 'Outfit', sans-serif;
-            color: var(--text-primary);
-            margin-bottom: var(--spacing-lg);
-            font-size: clamp(1.5rem, 3vw, 2rem);
-            font-weight: 700;
-            letter-spacing: -0.01em;
-        }
-
-        .doc-type-buttons {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-md);
-            margin-top: var(--spacing-lg);
-        }
-
-        .doc-type-btn {
-            padding: var(--spacing-xl) var(--spacing-lg);
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all var(--transition-base);
-            font-size: 1.125rem;
-            font-weight: 600;
-            font-family: 'Outfit', sans-serif;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .doc-type-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 100%);
-            opacity: 0;
-            transition: opacity var(--transition-base);
-        }
-
-        .doc-type-btn:hover::before {
-            opacity: 1;
-        }
-
-        .doc-type-btn:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(6, 182, 212, 0.4);
-        }
-
-        .doc-type-btn:active {
-            transform: translateY(-2px);
-        }
-
-        .doc-type-btn .icon {
-            font-size: 3rem;
-            display: block;
-            margin-bottom: var(--spacing-md);
-        }
-
-        /* Main Content Grid */
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: var(--spacing-lg);
-            animation-delay: 0.2s;
-        }
-
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            /* On tablet, show preview below input when toggled */
-            #previewPanel.show-mobile-preview {
-                margin-top: var(--spacing-lg);
-            }
+            grid-template-columns: 1fr;
+            gap: 20px;
         }
         
-        @media (max-width: 768px) {
-            /* Show toggle button on mobile */
-            .mobile-preview-toggle {
-                display: block !important;
+        /* Show two columns only when preview is visible on desktop */
+        @media (min-width: 1024px) {
+            .container.show-preview {
+                grid-template-columns: 1fr 1fr;
             }
         }
-        
+
         .panel {
-            animation-delay: 0.3s;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
         }
         
-        /* Hide preview panel by default - show only when toggled */
+        /* Hide preview by default */
         #previewPanel {
             display: none;
         }
         
-        #previewPanel.show-mobile-preview {
+        /* Show preview when visible class is added */
+        #previewPanel.visible {
             display: block;
         }
         
-        /* Force desktop rendering for PDF generation */
-        #previewPanel.force-desktop-render,
-        #preview.force-desktop-render {
-            min-width: 800px !important;
-            max-width: 800px !important;
-            width: 800px !important;
+        /* Toggle preview button (desktop only) */
+        .toggle-preview-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: none;
         }
         
-        #preview.force-desktop-render *,
-        #preview.force-desktop-render .invoice-container,
-        #preview.force-desktop-render .invoice-top,
-        #preview.force-desktop-render .line-items-table {
-            max-width: none !important;
-            box-sizing: border-box !important;
+        @media (min-width: 1024px) {
+            .toggle-preview-btn {
+                display: block;
+            }
         }
         
-        #preview.force-desktop-render .invoice-container {
-            max-width: 800px !important;
-            width: 800px !important;
-            min-width: 800px !important;
-        }
-        
-        #preview.force-desktop-render table {
-            display: table !important;
-            width: 100% !important;
-            table-layout: fixed !important;
-            overflow-x: visible !important;
-            white-space: normal !important;
-        }
-        
-        /* Mobile-specific preview toggle button styling */
-        .mobile-preview-toggle {
+        /* Responsive messaging helpers */
+        .mobile-only {
             display: block;
-            width: 100%;
-            margin-top: var(--spacing-md);
+        }
+        
+        .desktop-only {
+            display: none;
+        }
+        
+        @media (min-width: 1024px) {
+            .mobile-only {
+                display: none;
+            }
+            
+            .desktop-only {
+                display: block;
+            }
         }
 
-        .panel h2 {
-            font-family: 'Outfit', sans-serif;
-            color: var(--text-primary);
-            margin-bottom: var(--spacing-lg);
-            font-size: 1.5rem;
-            font-weight: 700;
-            padding-bottom: var(--spacing-sm);
-            border-bottom: 3px solid var(--primary);
-            letter-spacing: -0.01em;
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
         }
 
-        /* Question Box */
-        .question-box {
-            background: rgba(6, 182, 212, 0.08);
-            padding: var(--spacing-md);
-            border-radius: 16px;
-            margin-bottom: var(--spacing-md);
-            border-left: 4px solid var(--primary);
-            transition: all var(--transition-base);
-        }
-
-        .question-box:hover {
-            background: rgba(6, 182, 212, 0.12);
-            transform: translateX(4px);
-        }
-
-        .question-text {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: var(--spacing-md);
-        }
-
-        /* Modern Input Group with Floating Labels */
         .input-group {
-            margin-bottom: var(--spacing-md);
-            position: relative;
+            margin-bottom: 20px;
         }
 
-        .input-group label {
+        label {
             display: block;
-            margin-bottom: var(--spacing-xs);
-            color: var(--text-secondary);
+            margin-bottom: 8px;
+            color: #555;
             font-weight: 500;
-            font-size: 0.875rem;
-            transition: all var(--transition-base);
         }
 
         input[type="text"],
-        input[type="number"],
         input[type="date"],
+        input[type="number"],
         textarea,
         select {
             width: 100%;
-            padding: 0.875rem 1rem;
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            transition: all var(--transition-base);
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(10px);
-            color: var(--text-primary);
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
         }
 
         input:focus,
         textarea:focus,
         select:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(6, 182, 212, 0.1);
-            background: rgba(255, 255, 255, 0.8);
-            transform: translateY(-2px);
-        }
-
-        input::placeholder,
-        textarea::placeholder {
-            color: var(--text-muted);
+            border-color: #667eea;
         }
 
         textarea {
@@ -596,650 +130,269 @@ Version 1.0 - [Original Release]
             resize: vertical;
         }
 
-        /* Modern Buttons */
         .btn {
-            padding: 0.875rem 1.75rem;
+            padding: 12px 24px;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
+            border-radius: 8px;
+            font-size: 1em;
             font-weight: 600;
-            font-family: 'Outfit', sans-serif;
             cursor: pointer;
-            transition: all var(--transition-base);
-            margin: 0.25rem;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
+            transition: all 0.3s;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: #667eea;
             color: white;
         }
 
         .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(6, 182, 212, 0.3);
+            background: #5568d3;
+            transform: translateY(-2px);
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+            background: #6c757d;
             color: white;
         }
 
         .btn-secondary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(100, 116, 139, 0.3);
+            background: #5a6268;
         }
 
         .btn-success {
-            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            background: #28a745;
             color: white;
         }
 
         .btn-success:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+            background: #218838;
         }
 
         .btn-danger {
-            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            background: #dc3545;
             color: white;
         }
 
         .btn-danger:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+            background: #c82333;
         }
 
-        .btn:active {
-            transform: translateY(-1px);
-        }
-
-        /* Voice Button */
-        .voice-btn {
-            width: 100%;
-            padding: 0.875rem;
-            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: var(--spacing-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: var(--spacing-sm);
-            transition: all var(--transition-base);
-        }
-
-        .voice-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
-        }
-
-        .voice-btn.listening {
-            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { 
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            50% { 
-                box-shadow: 0 0 0 15px rgba(16, 185, 129, 0);
-            }
-        }
-
-        /* Button Group */
         .button-group {
             display: flex;
-            flex-wrap: wrap;
-            gap: var(--spacing-sm);
-            margin-top: var(--spacing-md);
-            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
         }
 
-        /* Progress Steps */
-        .progress-container {
-            margin: var(--spacing-lg) 0;
+        .section-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
         }
 
-        .progress-steps {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: var(--spacing-md);
-            position: relative;
-        }
-
-        .progress-steps::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: var(--border);
-            z-index: 0;
-        }
-
-        .progress-bar {
-            position: absolute;
-            top: 20px;
-            left: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-            transition: width var(--transition-slow);
-            z-index: 1;
-        }
-
-        .step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            z-index: 2;
-        }
-
-        .step-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(10px);
-            border: 3px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            transition: all var(--transition-base);
-            color: var(--text-secondary);
-        }
-
-        .step.active .step-circle {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            border-color: var(--primary);
-            color: white;
-            transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(6, 182, 212, 0.4);
-        }
-
-        .step.completed .step-circle {
-            background: var(--success);
-            border-color: var(--success);
-            color: white;
-        }
-
-        .step-label {
-            margin-top: var(--spacing-xs);
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-align: center;
-        }
-
-        /* Line Items */
         .line-item {
-            background: rgba(6, 182, 212, 0.05);
-            padding: var(--spacing-md);
-            border-radius: 12px;
-            margin-bottom: var(--spacing-sm);
-            display: flex;
-            gap: var(--spacing-sm);
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
+        }
+
+        .line-item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 10px;
             align-items: center;
-            transition: all var(--transition-base);
-            border: 1px solid var(--border);
         }
 
-        .line-item:hover {
-            background: rgba(6, 182, 212, 0.08);
-            transform: translateX(4px);
-        }
-
-        .line-item-field {
-            flex: 1;
-        }
-
-        .line-item-remove {
-            padding: 0.5rem 1rem;
-            background: var(--danger);
+        .remove-btn {
+            background: #dc3545;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2em;
             cursor: pointer;
-            font-weight: 600;
-            transition: all var(--transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .line-item-remove:hover {
-            background: #dc2626;
-            transform: scale(1.05);
+        .remove-btn:hover {
+            background: #c82333;
         }
 
-        .add-line-btn {
-            width: 100%;
-            padding: 0.875rem;
-            background: rgba(6, 182, 212, 0.1);
-            color: var(--primary);
-            border: 2px dashed var(--primary);
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all var(--transition-base);
-            margin-top: var(--spacing-sm);
-        }
-
-        .add-line-btn:hover {
-            background: rgba(6, 182, 212, 0.15);
-            transform: translateY(-2px);
-        }
-
-        /* Preview Panel */
-        #preview {
+        .preview {
             background: white;
-            padding: var(--spacing-xl);
-            border-radius: 12px;
-            min-height: 400px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-family: Arial, sans-serif;
+            font-size: 10pt;
+            min-height: 500px;
         }
 
-        /* Utility Classes */
+        .preview table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            border: 2px solid #333;
+        }
+
+        .preview th,
+        .preview td {
+            padding: 10px 8px;
+            text-align: left;
+            border-right: 1px solid #999;
+            font-size: 10pt;
+        }
+        
+        /* All columns use Arial 10pt */
+        .preview th:nth-child(2),
+        .preview th:nth-child(3),
+        .preview th:nth-child(4),
+        .preview td:nth-child(2),
+        .preview td:nth-child(3),
+        .preview td:nth-child(4) {
+            font-size: 10pt;
+        }
+        
+        .preview th:last-child,
+        .preview td:last-child {
+            border-right: none;
+        }
+
+        .preview th {
+            background: white;
+            font-weight: bold;
+            text-align: right;
+            border-bottom: 2px solid #333;
+        }
+
+        .preview th:first-child {
+            text-align: left;
+        }
+
+        .preview td {
+            text-align: right;
+        }
+
+        .preview td:first-child {
+            text-align: left;
+            padding-left: 10px;  /* Simple padding, no hanging indent */
+            text-indent: 0;  /* No indent */
+        }
+        
+        .section-header td:first-child {
+            padding-left: 10px;
+            text-indent: 0;
+        }
+
+        .section-header {
+            background: #d3d3d3 !important;
+            font-weight: bold;
+            border-bottom: 1px solid #999 !important;
+        }
+        
+        .section-header td {
+            border-bottom: 1px solid #999 !important;
+        }
+
+        .invoice-total-row {
+            background: #999999 !important;
+            color: white;
+            font-weight: bold;
+            border-top: 2px solid #333 !important;
+            border-bottom: 2px solid #333 !important;
+        }
+        
+        /* Invoice table - clean design with no vertical borders */
+        .preview table.invoice-table {
+            border: none !important;
+        }
+        
+        .preview table.invoice-table th,
+        .preview table.invoice-table td {
+            border-left: none !important;
+            border-right: none !important;
+        }
+        
+        .preview table.invoice-table th {
+            border-bottom: none !important;
+        }
+        
+        .invoice-total-row td {
+            border-top: 2px solid #333 !important;
+            border-bottom: 2px solid #333 !important;
+        }
+
         .hidden {
             display: none;
         }
 
-        /* Step Indicator */
-        .step-indicator {
-            text-align: center;
-            color: var(--text-secondary);
-            margin-bottom: var(--spacing-md);
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            body {
-                padding: var(--spacing-sm);
-                overflow-x: hidden;
-            }
-            
-            * {
-                max-width: 100%;
-                box-sizing: border-box;
-            }
-
-            .glass-panel {
-                padding: var(--spacing-md);
-                border-radius: 16px;
-                overflow-x: hidden;
-            }
-
-            .header h1 {
-                font-size: 2rem;
-            }
-
-            .doc-type-buttons {
+        @media (max-width: 1024px) {
+            .container {
                 grid-template-columns: 1fr;
             }
-
-            .button-group {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-            }
-
-            .version-tag {
-                position: static;
-                display: inline-block;
-                margin-top: var(--spacing-sm);
-            }
-
-            .line-item {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .line-item-remove {
-                width: 100%;
-            }
-
-            .progress-steps {
-                font-size: 0.75rem;
-            }
-
-            .step-circle {
-                width: 32px;
-                height: 32px;
-                font-size: 0.875rem;
-            }
-            
-            /* Ensure input panel takes full width on mobile */
-            .panel:first-child {
-                width: 100%;
-                max-width: 100%;
-            }
-            
-            /* Fix preview content overflow - EXCEPT when generating PDF */
-            #preview:not(.force-desktop-render),
-            #preview:not(.force-desktop-render) * {
-                max-width: 100% !important;
-                overflow-x: auto;
-                word-wrap: break-word;
-            }
-            
-            #preview:not(.force-desktop-render) table {
-                display: block;
-                overflow-x: auto;
-                white-space: nowrap;
-            }
-            
-            /* Ensure all containers respect viewport */
-            .container,
-            .main-content,
-            .question-box {
-                max-width: 100%;
-                overflow-x: hidden;
-            }
-        }
-
-        /* Print Styles */
-        @media print {
-            body {
-                background: white;
-                padding: 0;
-            }
-
-            body::before {
-                display: none;
-            }
-
-            .glass-panel {
-                background: white;
-                backdrop-filter: none;
-                box-shadow: none;
-                border: none;
-            }
-
-            .header,
-            .button-group,
-            .voice-btn {
-                display: none;
-            }
-
-            #preview {
-                box-shadow: none;
-            }
-        }
-
-        /* Loading Animation */
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.8s linear infinite;
-        }
-        
-        /* Settings Button */
-        .settings-btn {
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(10px);
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all var(--transition-base);
-            cursor: pointer;
-            color: white;
-        }
-        
-        .settings-btn:hover {
-            background: rgba(255, 255, 255, 0.35);
-            transform: scale(1.05);
-        }
-        
-        /* Settings Modal */
-        .settings-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .settings-modal.show {
-            display: flex;
-        }
-        
-        .settings-content {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px) saturate(180%);
-            border-radius: 24px;
-            padding: var(--spacing-xl);
-            max-width: 600px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: var(--glass-shadow);
-            border: 1px solid var(--glass-border);
-            animation: slideUp 0.3s ease-out;
-        }
-        
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .settings-content h2 {
-            font-family: 'Outfit', sans-serif;
-            color: var(--text-primary);
-            margin-bottom: var(--spacing-lg);
-            font-size: 1.8rem;
-            font-weight: 700;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <button class="settings-btn" onclick="openSettings()">⚙️ Company Settings</button>
-            <span class="version-tag">v2.4.2</span>
-            <h1>📋 SmartPro</h1>
-            <p>Professional Document Generator - Modern & Intelligent</p>
-        </div>
-        
-        <!-- Settings Modal -->
-        <div id="settingsModal" class="settings-modal">
-            <div class="settings-content">
-                <h2>⚙️ Company Settings</h2>
-                
-                <div class="input-group">
-                    <label>Company Name:</label>
-                    <input type="text" id="companyName" placeholder="D GISS Construction II LLC">
-                </div>
-                
-                <div class="input-group">
-                    <label>Address Line 1:</label>
-                    <input type="text" id="companyAddress1" placeholder="43 Warner Ave">
-                </div>
-                
-                <div class="input-group">
-                    <label>Address Line 2:</label>
-                    <input type="text" id="companyAddress2" placeholder="West Haven, CT 06516">
-                </div>
-                
-                <div class="input-group">
-                    <label>Phone Number:</label>
-                    <input type="text" id="companyPhone" placeholder="(203) 997-6542">
-                </div>
-                
-                <div class="input-group">
-                    <label>License/HIC Number:</label>
-                    <input type="text" id="companyHIC" placeholder="HIC# 0663546">
-                </div>
-                
-                <div class="button-group" style="flex-direction: row; gap: 10px; margin-top: 20px;">
-                    <button class="btn btn-success" onclick="saveSettings()" style="flex: 1;">
-                        ✓ Save Settings
-                    </button>
-                    <button class="btn btn-secondary" onclick="closeSettings()" style="flex: 1;">
-                        Cancel
-                    </button>
-                </div>
-            </div>
+    <div class="container" id="mainContainer">
+        <div class="panel">
+            <h2>SmartPro Document Generator v5.6</h2>
+            <div id="inputContainer"></div>
         </div>
 
-        <div id="docTypeSelector" class="doc-type-selector glass-panel">
-            <h2>What would you like to create?</h2>
-            <div class="doc-type-buttons">
-                <button class="doc-type-btn" onclick="selectDocType('invoice')">
-                    <span class="icon">💵</span>
-                    Invoice
-                </button>
-                <button class="doc-type-btn" onclick="selectDocType('proposal')">
-                    <span class="icon">📄</span>
-                    Proposal
-                </button>
-                <button class="doc-type-btn" onclick="selectDocType('changeorder')">
-                    <span class="icon">🔄</span>
-                    Change Order
-                </button>
-            </div>
-        </div>
-
-        <div id="mainContent" class="main-content hidden">
-            <!-- Input Panel -->
-            <div class="panel glass-panel">
-                <h2>✏️ Input <span id="docTypeLabel"></span></h2>
-                
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-                </div>
-                <div class="step-indicator" id="stepIndicator"></div>
-
-                <div id="inputContainer">
-                    <!-- Questions will be dynamically loaded here -->
-                </div>
-                
-                <!-- Mobile Preview Toggle Button -->
-                <button class="btn btn-secondary mobile-preview-toggle" onclick="toggleMobilePreview()">
-                    👁️ Show/Hide Preview
-                </button>
-            </div>
-
-            <!-- Preview Panel -->
-            <div class="panel glass-panel" id="previewPanel">
-                <h2>👁️ Live Preview</h2>
-                <div class="button-group">
-                    <button class="btn btn-success" onclick="printToPDF()">🖨️ Print to PDF</button>
-                    <button class="btn btn-primary" onclick="exportPDF()">📥 Download PDF</button>
-                    <button class="btn btn-secondary" onclick="startOver()">🔄 Start Over</button>
-                </div>
-                <div id="preview" class="preview">
-                    <p style="text-align: center; color: #999; padding: 50px;">
-                        Preview will appear here as you answer questions...
-                    </p>
-                </div>
-            </div>
+        <div class="panel" id="previewPanel">
+            <h2>Preview</h2>
+            <div id="preview" class="preview"></div>
         </div>
     </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
+    <!-- Toggle preview button (desktop only) -->
+    <button class="btn btn-secondary toggle-preview-btn" id="togglePreviewBtn" onclick="togglePreview()" style="display: none;">
+        👁️ Toggle Preview
+    </button>
+
     <script>
-        // ========== GLOBAL STATE ==========
-        let documentType = null;
-        let currentStep = 1;
-        let totalSteps = 0;
-        let recognition = null;
-
-        // Data structures
-        const invoiceData = {
-            client: '',
-            date: '',
-            invoiceNumber: '',
-            lineItems: []
-        };
-
+        // Proposal data structure with line items
         const proposalData = {
-            documentType: '', // 'proposal' or 'changeorder'
+            documentType: 'invoice', // 'invoice', 'proposal', or 'change_order'
             proposalTitle: '',
             date: '',
             client: '',
             address: '',
-            sections: [],
+            sections: [], // Each section: { name: "Painting", material: 0, labor: 0, lineItems: [{description, material, labor, total}] }
             dumpsterFee: 0,
             permitFee: 0,
             gcFee: 0,
             notes: '',
-            paymentPlan: {
-                percent1: 50,
-                percent2: 25,
-                percent3: 25
-            }
+            paymentPlan: [
+                { label: 'Down Payment', percent: 50 },
+                { label: 'Final Payment', percent: 50 }
+            ],
+            isPaid: false
         };
 
-        // Initialize speech recognition
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            recognition.lang = 'en-US';
-        }
+        // Invoice data (simpler structure than proposals)
+        const invoiceData = {
+            date: '',
+            client: '',
+            invoiceNumber: '',
+            lineItems: [], // {description, amount}
+            isPaid: false
+        };
 
-        // ========== COMPANY SETTINGS ==========
-        
-        // Default company information
-        const defaultCompanyInfo = {
+        let currentStep = 1;
+        let currentEditingSection = -1;
+        let currentEditingLineItem = -1;
+        let previewVisible = false;
+
+        // Company info
+        const companyInfo = {
             name: 'D GISS Construction II LLC',
             address1: '43 Warner Ave',
             address2: 'West Haven, CT 06516',
@@ -1247,63 +400,171 @@ Version 1.0 - [Original Release]
             hic: 'HIC# 0663546'
         };
         
-        // Load company settings from localStorage
-        function getCompanyInfo() {
-            const saved = localStorage.getItem('companyInfo');
-            if (saved) {
-                return JSON.parse(saved);
-            }
-            return defaultCompanyInfo;
+        // Functions to show/hide preview
+        function showPreview() {
+            previewVisible = true;
+            document.getElementById('previewPanel').classList.add('visible');
+            document.getElementById('mainContainer').classList.add('show-preview');
+            const btn = document.getElementById('togglePreviewBtn');
+            if (btn) btn.style.display = 'none'; // Hide toggle button in review mode
+            updatePreview();
         }
         
-        // Save company settings to localStorage
-        function setCompanyInfo(info) {
-            localStorage.setItem('companyInfo', JSON.stringify(info));
+        function hidePreview() {
+            previewVisible = false;
+            document.getElementById('previewPanel').classList.remove('visible');
+            document.getElementById('mainContainer').classList.remove('show-preview');
+            const btn = document.getElementById('togglePreviewBtn');
+            if (btn) btn.style.display = 'block'; // Show toggle button when not in review
         }
         
-        // Open settings modal
-        function openSettings() {
-            const company = getCompanyInfo();
-            document.getElementById('companyName').value = company.name;
-            document.getElementById('companyAddress1').value = company.address1;
-            document.getElementById('companyAddress2').value = company.address2;
-            document.getElementById('companyPhone').value = company.phone;
-            document.getElementById('companyHIC').value = company.hic;
-            document.getElementById('settingsModal').classList.add('show');
-        }
-        
-        // Close settings modal
-        function closeSettings() {
-            document.getElementById('settingsModal').classList.remove('show');
-        }
-        
-        // Save settings and close modal
-        function saveSettings() {
-            const company = {
-                name: document.getElementById('companyName').value || defaultCompanyInfo.name,
-                address1: document.getElementById('companyAddress1').value || defaultCompanyInfo.address1,
-                address2: document.getElementById('companyAddress2').value || defaultCompanyInfo.address2,
-                phone: document.getElementById('companyPhone').value || defaultCompanyInfo.phone,
-                hic: document.getElementById('companyHIC').value || defaultCompanyInfo.hic
-            };
-            
-            setCompanyInfo(company);
-            closeSettings();
-            
-            // Show success message
-            alert('✅ Company settings saved successfully!');
-            
-            // Update preview if currently visible
-            if (documentType === 'invoice') {
-                updateInvoicePreview();
-            } else if (documentType === 'proposal' || documentType === 'changeorder') {
-                updateProposalPreview();
+        function togglePreview() {
+            if (previewVisible) {
+                hidePreview();
+            } else {
+                showPreview();
             }
         }
 
-        // ========== UTILITY FUNCTIONS ==========
+        // Save and Load Functions
+        function saveDraft() {
+            // Check if this is an invoice or proposal
+            if (proposalData.documentType === 'invoice') {
+                // Save invoice using invoice-specific function
+                saveInvoiceDraft();
+            } else {
+                // Save proposal
+                const draftName = prompt("Enter a name for this draft:", proposalData.proposalTitle || proposalData.client || "Untitled Draft");
+                if (!draftName) return;
+                
+                const draft = {
+                    name: draftName,
+                    date: new Date().toISOString(),
+                    data: JSON.parse(JSON.stringify(proposalData)) // Deep copy
+                };
+                
+                // Get existing drafts
+                const drafts = JSON.parse(localStorage.getItem('smartProDrafts') || '[]');
+                
+                // Add new draft
+                drafts.push(draft);
+                
+                // Save to localStorage
+                localStorage.setItem('smartProDrafts', JSON.stringify(drafts));
+                
+                alert(`✅ Draft "${draftName}" saved successfully!`);
+            }
+        }
+        
+        function showSavedDrafts() {
+            const drafts = JSON.parse(localStorage.getItem('smartProDrafts') || '[]');
+            
+            if (drafts.length === 0) {
+                alert('No saved drafts found.');
+                return;
+            }
+            
+            document.getElementById('inputContainer').innerHTML = `
+                <h3>📁 Saved Drafts</h3>
+                
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <p style="margin: 0;">Select a draft to load and continue editing.</p>
+                </div>
+                
+                <div id="draftsList" style="margin: 15px 0;">
+                    ${drafts.map((draft, index) => {
+                        const date = new Date(draft.date);
+                        const formattedDate = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                        return `
+                            <div class="section-item" style="display: flex; justify-content: space-between; align-items: center; margin: 10px 0; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ddd;">
+                                <div style="flex: 1;">
+                                    <strong style="font-size: 1.1em;">${draft.name}</strong>
+                                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Saved: ${formattedDate}</p>
+                                    <p style="margin: 5px 0 0 0; color: #666; font-size: 0.9em;">Client: ${draft.data.client || '[Not set]'}</p>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-primary" onclick="loadDraft(${index})">📂 Load</button>
+                                    <button class="btn btn-danger" onclick="deleteDraft(${index})">🗑️ Delete</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="showBasicInfo()">← Start New Document</button>
+                </div>
+            `;
+        }
+        
+        function loadDraft(index) {
+            const drafts = JSON.parse(localStorage.getItem('smartProDrafts') || '[]');
+            
+            if (index >= 0 && index < drafts.length) {
+                const draft = drafts[index];
+                
+                // Load data into proposalData
+                Object.assign(proposalData, draft.data);
+                
+                alert(`✅ Draft "${draft.name}" loaded!`);
+                
+                // Go to basic info screen to continue editing
+                showBasicInfo();
+            }
+        }
+        
+        function deleteDraft(index) {
+            const drafts = JSON.parse(localStorage.getItem('smartProDrafts') || '[]');
+            
+            if (index >= 0 && index < drafts.length) {
+                const draft = drafts[index];
+                
+                if (confirm(`Delete draft "${draft.name}"?`)) {
+                    drafts.splice(index, 1);
+                    localStorage.setItem('smartProDrafts', JSON.stringify(drafts));
+                    showSavedDrafts(); // Refresh the list
+                }
+            }
+        }
 
-        // Invoice number tracking
+        // Start with document type selection
+        showDocumentTypeSelection();
+        
+        function showDocumentTypeSelection() {
+            hidePreview();
+            document.getElementById('inputContainer').innerHTML = `
+                <h3>Select Document Type</h3>
+                
+                <div style="display: flex; flex-direction: column; gap: 15px; max-width: 400px; margin: 20px auto;">
+                    <button class="btn btn-primary" onclick="selectDocumentType('invoice')" style="padding: 20px; font-size: 1.2em;">
+                        📋 Invoice
+                    </button>
+                    <button class="btn btn-primary" onclick="selectDocumentType('proposal')" style="padding: 20px; font-size: 1.2em;">
+                        📄 Proposal
+                    </button>
+                    <button class="btn btn-primary" onclick="selectDocumentType('change_order')" style="padding: 20px; font-size: 1.2em;">
+                        🔄 Change Order
+                    </button>
+                </div>
+            `;
+        }
+        
+        function selectDocumentType(type) {
+            proposalData.documentType = type;
+            
+            if (type === 'invoice') {
+                // Invoice has its own simpler workflow
+                showInvoiceStep(1);
+            } else {
+                // Proposal, Change Order use the full workflow
+                showBasicInfo();
+            }
+        }
+        
+        // ============================================
+        // INVOICE NUMBERING (per client)
+        // ============================================
+        
         function getInvoiceNumbers() {
             return JSON.parse(localStorage.getItem('invoiceNumbers') || '{}');
         }
@@ -1321,38 +582,137 @@ Version 1.0 - [Original Release]
             localStorage.setItem('invoiceNumbers', JSON.stringify(invoiceNumbers));
         }
         
-        // Date formatting helper
-        function formatDate(dateString) {
-            if (!dateString) return '';
-            // Simply split YYYY-MM-DD and rearrange to MM/DD/YYYY
-            // No Date objects = no timezone issues
-            const [year, month, day] = dateString.split('-');
-            return `${month}/${day}/${year}`;
-        }
-
-        function selectDocType(type) {
-            documentType = type;
-            document.getElementById('docTypeSelector').classList.add('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
-            
-            const label = type === 'invoice' ? 'Invoice' : (type === 'proposal' ? 'Proposal' : 'Change Order');
-            document.getElementById('docTypeLabel').textContent = `(${label})`;
-            
-            if (type === 'invoice') {
-                totalSteps = 3; // Client info, Line items, Review
-                showInvoiceStep(1);
-            } else {
-                proposalData.documentType = type;
-                totalSteps = 6; // Same as before
-                showProposalStep(1);
+        function updateClientAndNumber() {
+            const client = document.getElementById('invoiceClient').value;
+            if (client) {
+                const nextNumber = getNextInvoiceNumber(client);
+                document.getElementById('invoiceNumber').value = nextNumber;
+                invoiceData.client = client;
+                invoiceData.invoiceNumber = nextNumber;
             }
+            updateInvoicePreview();
         }
-
-        // ========== INVOICE FLOW ==========
+        
+        // ============================================
+        // INVOICE SAVE/LOAD FUNCTIONALITY
+        // ============================================
+        
+        function saveInvoiceDraft() {
+            if (!invoiceData.client) {
+                alert('Please enter a client name before saving');
+                return;
+            }
+            
+            const draftName = `Invoice_${invoiceData.invoiceNumber}_${invoiceData.client}`;
+            const drafts = JSON.parse(localStorage.getItem('invoiceDrafts') || '{}');
+            
+            drafts[draftName] = {
+                ...invoiceData,
+                savedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('invoiceDrafts', JSON.stringify(drafts));
+            alert(`✅ Invoice saved as: ${draftName}`);
+        }
+        
+        function showSavedInvoices() {
+            const drafts = JSON.parse(localStorage.getItem('invoiceDrafts') || '{}');
+            const draftList = Object.keys(drafts);
+            
+            if (draftList.length === 0) {
+                alert('No saved invoices found.');
+                return;
+            }
+            
+            document.getElementById('inputContainer').innerHTML = `
+                <h3>📁 Saved Invoices</h3>
+                
+                <div class="section-item">
+                    <p>Select an invoice to load and edit:</p>
+                    
+                    ${draftList.map(name => {
+                        const draft = drafts[name];
+                        const savedDate = new Date(draft.savedAt).toLocaleDateString();
+                        return `
+                            <div style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 4px; background: #f9f9f9;">
+                                <div style="font-weight: bold; margin-bottom: 5px;">${name}</div>
+                                <div style="font-size: 0.9em; color: #666;">
+                                    Client: ${draft.client} | 
+                                    Invoice #${draft.invoiceNumber} | 
+                                    Items: ${draft.lineItems.length} | 
+                                    Saved: ${savedDate}
+                                </div>
+                                <div style="margin-top: 10px;">
+                                    <button class="btn btn-primary" onclick="loadInvoiceDraft('${name}')" style="margin-right: 10px;">
+                                        📂 Load
+                                    </button>
+                                    <button class="btn btn-danger" onclick="deleteInvoiceDraft('${name}')">
+                                        🗑️ Delete
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                    
+                    <div class="button-group" style="margin-top: 20px;">
+                        <button class="btn btn-secondary" onclick="showInvoiceStep(1)">← Back</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function loadInvoiceDraft(draftName) {
+            const drafts = JSON.parse(localStorage.getItem('invoiceDrafts') || '{}');
+            const draft = drafts[draftName];
+            
+            if (!draft) {
+                alert('Draft not found');
+                return;
+            }
+            
+            // Load draft data
+            invoiceData.date = draft.date;
+            invoiceData.client = draft.client;
+            invoiceData.invoiceNumber = draft.invoiceNumber;
+            invoiceData.lineItems = draft.lineItems || [];
+            invoiceData.isPaid = draft.isPaid || false;
+            
+            // Go to line items screen
+            showInvoiceStep(2);
+            alert(`✅ Loaded: ${draftName}`);
+        }
+        
+        function deleteInvoiceDraft(draftName) {
+            if (!confirm(`Delete invoice: ${draftName}?`)) {
+                return;
+            }
+            
+            const drafts = JSON.parse(localStorage.getItem('invoiceDrafts') || '{}');
+            delete drafts[draftName];
+            localStorage.setItem('invoiceDrafts', JSON.stringify(drafts));
+            
+            showSavedInvoices(); // Refresh list
+        }
+        
+        // ============================================
+        // INVOICE WORKFLOW (Simpler than Proposals)
+        // ============================================
         
         function showInvoiceStep(step) {
+            // Save current step data before navigating
+            if (currentStep === 1) {
+                // Save basic info if fields exist
+                const dateField = document.getElementById('invoiceDate');
+                const clientField = document.getElementById('invoiceClient');
+                const numberField = document.getElementById('invoiceNumber');
+                
+                if (dateField) invoiceData.date = dateField.value;
+                if (clientField) invoiceData.client = clientField.value;
+                if (numberField) invoiceData.invoiceNumber = numberField.value;
+            }
+            
             currentStep = step;
-            updateProgress();
+            hidePreview();
             
             switch(step) {
                 case 1:
@@ -1366,135 +726,49 @@ Version 1.0 - [Original Release]
                     break;
             }
         }
-
+        
         function showInvoiceBasicInfo() {
             const today = new Date().toISOString().split('T')[0];
             
             document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Invoice Information</div>
-                    
+                <h3>Step 1 of 3: Invoice Information</h3>
+                
+                <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ffc107;">
+                    <button class="btn btn-success" onclick="showSavedInvoices()" style="width: 100%;">
+                        📁 Load Saved Invoice
+                    </button>
+                </div>
+                
+                <div class="section-item">
                     <div class="input-group">
                         <label>Invoice Date:</label>
-                        <input type="date" id="invoiceDate" value="${today}" onchange="updateInvoicePreview()">
+                        <input type="date" id="invoiceDate" value="${invoiceData.date || today}" onchange="updateInvoicePreview()">
                     </div>
                     
                     <div class="input-group">
                         <label>Billed To (Client Name):</label>
-                        <input type="text" id="invoiceClient" placeholder="e.g., Allegiate Gym" oninput="updateClientAndNumber()">
-                        ${getVoiceButton('invoiceClient')}
+                        <input type="text" id="invoiceClient" placeholder="e.g., John Smith" value="${invoiceData.client || ''}" oninput="updateClientAndNumber()">
                     </div>
                     
                     <div class="input-group">
                         <label>Invoice Number:</label>
-                        <input type="text" id="invoiceNumber" placeholder="001" oninput="updateInvoicePreview()">
-                        <small style="color: #666;">Auto-suggested, but you can edit it</small>
+                        <input type="text" id="invoiceNumber" placeholder="001" value="${invoiceData.invoiceNumber || '001'}" oninput="updateInvoicePreview()">
+                        <small style="color: #666;">Auto-suggested based on client, but you can edit it</small>
                     </div>
                     
-                    <button class="btn btn-danger" onclick="showResetInvoiceNumbers()" style="width: 100%; margin: 10px 0; font-size: 0.9em;">
-                        🔄 Reset Invoice Numbers
-                    </button>
-                    
                     <div class="button-group">
-                        <button class="btn btn-primary" onclick="saveInvoiceBasicAndNext()">Next →</button>
+                        <button class="btn btn-secondary" onclick="showDocumentTypeSelection()">← Back</button>
+                        <button class="btn btn-primary" onclick="saveInvoiceBasicAndNext()">Next: Line Items →</button>
                     </div>
                 </div>
             `;
             
-            if (invoiceData.date) document.getElementById('invoiceDate').value = invoiceData.date;
+            // If coming back with existing data, trigger number update
             if (invoiceData.client) {
-                document.getElementById('invoiceClient').value = invoiceData.client;
                 updateClientAndNumber();
             }
-            
-            updateInvoicePreview();
         }
         
-        function showResetInvoiceNumbers() {
-            const invoiceNumbers = getInvoiceNumbers();
-            const clients = Object.keys(invoiceNumbers);
-            
-            if (clients.length === 0) {
-                alert('No invoice numbers to reset.');
-                return;
-            }
-            
-            document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Reset Invoice Numbers</div>
-                    
-                    <p style="color: #e74c3c; font-weight: bold; margin-bottom: 15px;">
-                        ⚠️ Warning: This will reset invoice numbers for selected clients!
-                    </p>
-                    
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                        ${clients.map(client => `
-                            <div style="margin: 10px 0;">
-                                <label style="display: flex; align-items: center; cursor: pointer;">
-                                    <input type="checkbox" id="reset_${client.replace(/\s/g, '_')}" value="${client}" style="margin-right: 10px; width: auto;">
-                                    <span><strong>${client}</strong> - Current: ${String(invoiceNumbers[client]).padStart(3, '0')}</span>
-                                </label>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <button class="btn btn-danger" onclick="resetSelectedInvoiceNumbers()" style="width: 100%; margin-bottom: 10px;">
-                        Reset Selected to 001
-                    </button>
-                    
-                    <button class="btn btn-danger" onclick="resetAllInvoiceNumbers()" style="width: 100%; margin-bottom: 10px;">
-                        Reset All Invoice Numbers
-                    </button>
-                    
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="showInvoiceBasicInfo()">← Back</button>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function resetSelectedInvoiceNumbers() {
-            const invoiceNumbers = getInvoiceNumbers();
-            const clients = Object.keys(invoiceNumbers);
-            let resetCount = 0;
-            
-            clients.forEach(client => {
-                const checkbox = document.getElementById('reset_' + client.replace(/\s/g, '_'));
-                if (checkbox && checkbox.checked) {
-                    delete invoiceNumbers[client];
-                    resetCount++;
-                }
-            });
-            
-            if (resetCount === 0) {
-                alert('Please select at least one client to reset.');
-                return;
-            }
-            
-            localStorage.setItem('invoiceNumbers', JSON.stringify(invoiceNumbers));
-            alert(`✅ Reset ${resetCount} client(s). Next invoice will start at 001.`);
-            showInvoiceBasicInfo();
-        }
-        
-        function resetAllInvoiceNumbers() {
-            if (confirm('Are you sure you want to reset ALL invoice numbers? This cannot be undone!')) {
-                localStorage.removeItem('invoiceNumbers');
-                alert('✅ All invoice numbers have been reset. Next invoice for any client will start at 001.');
-                showInvoiceBasicInfo();
-            }
-        }
-
-        function updateClientAndNumber() {
-            const client = document.getElementById('invoiceClient').value;
-            if (client) {
-                const nextNumber = getNextInvoiceNumber(client);
-                document.getElementById('invoiceNumber').value = nextNumber;
-                invoiceData.client = client;
-                invoiceData.invoiceNumber = nextNumber;
-            }
-            updateInvoicePreview();
-        }
-
         function saveInvoiceBasicAndNext() {
             invoiceData.date = document.getElementById('invoiceDate').value;
             invoiceData.client = document.getElementById('invoiceClient').value;
@@ -1510,1126 +784,815 @@ Version 1.0 - [Original Release]
                 return;
             }
             
+            // Save invoice number to localStorage for this client
+            saveInvoiceNumber(invoiceData.client, invoiceData.invoiceNumber);
+            
             showInvoiceStep(2);
         }
-
+        
         function showInvoiceLineItems() {
             document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Line Items</div>
-                    
-                    <div id="lineItemsList">
+                <h3>Step 2 of 3: Line Items</h3>
+                
+                <div class="section-item">
+                    <div id="invoiceLineItemsList">
+                        ${invoiceData.lineItems.length === 0 ? '<p style="color: #999; font-style: italic;">No line items yet</p>' : ''}
                         ${invoiceData.lineItems.map((item, index) => `
                             <div class="line-item">
-                                <div class="line-item-content">
+                                <div style="flex: 1;">
                                     <strong>${item.description}</strong><br>
-                                    <span style="color: #2ecc71; font-weight: bold;">$${item.amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                                    <span style="color: #28a745; font-weight: bold;">$${item.amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
                                 </div>
                                 <div style="display: flex; gap: 8px;">
-                                    <button class="btn btn-primary" onclick="editLineItem(${index})" style="padding: 8px 16px; margin: 0;">✏️ Edit</button>
-                                    <button class="remove-btn" onclick="removeLineItem(${index})">×</button>
+                                    <button class="btn btn-secondary" onclick="editInvoiceLineItem(${index})" style="padding: 6px 12px;">✏️</button>
+                                    <button class="remove-btn" onclick="removeInvoiceLineItem(${index})">×</button>
                                 </div>
                             </div>
                         `).join('')}
                     </div>
                     
-                    <button class="btn btn-success" onclick="addLineItem()" style="width: 100%; margin-top: 15px;">
+                    <button class="btn btn-success" onclick="addInvoiceLineItem()" style="width: 100%; margin-top: 15px;">
                         + Add Line Item
                     </button>
                     
+                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <strong>Invoice Total: $${invoiceData.lineItems.reduce((sum, item) => sum + item.amount, 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</strong>
+                    </div>
+                    
                     <div class="button-group">
                         <button class="btn btn-secondary" onclick="showInvoiceStep(1)">← Back</button>
-                        <button class="btn btn-primary" onclick="showInvoiceStep(3)">Next →</button>
+                        <button class="btn btn-primary" onclick="showInvoiceStep(3)">Next: Review →</button>
                     </div>
                 </div>
             `;
-            
-            updateInvoicePreview();
         }
-
-        function addLineItem() {
+        
+        function addInvoiceLineItem() {
             document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Add Line Item</div>
-                    
+                <h3>Step 2 of 3: Add Line Item</h3>
+                
+                <div class="section-item">
                     <div class="input-group">
                         <label>Description:</label>
-                        <textarea id="lineDescription" placeholder="e.g., Final Payment on 4/23 Proposal" autofocus></textarea>
-                        ${getVoiceButton('lineDescription')}
+                        <textarea id="lineDescription" placeholder="e.g., Final Payment on 4/23 Proposal" rows="3" autofocus style="width: 100%; padding: 10px; font-size: 1em; border: 1px solid #ddd; border-radius: 4px; resize: vertical;"></textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>
+                            <input type="checkbox" id="useVoice" style="width: auto; margin-right: 8px;">
+                            Enable voice input for description
+                        </label>
                     </div>
                     
                     <div class="input-group">
                         <label>Amount:</label>
-                        <input type="number" id="lineAmount" placeholder="0.00" step="0.01">
+                        <input type="number" id="lineAmount" placeholder="0.00" step="0.01" style="width: 100%; padding: 10px; font-size: 1em;">
                     </div>
                     
                     <div class="button-group">
                         <button class="btn btn-secondary" onclick="showInvoiceStep(2)">Cancel</button>
-                        <button class="btn btn-success" onclick="saveLineItem()">Save Line Item</button>
+                        <button class="btn btn-success" onclick="saveInvoiceLineItem()">Save Line Item</button>
                     </div>
                 </div>
             `;
         }
-
-        function saveLineItem() {
+        
+        function saveInvoiceLineItem() {
             const description = document.getElementById('lineDescription').value;
             const amount = parseFloat(document.getElementById('lineAmount').value) || 0;
             
-            if (!description) {
+            if (!description || !description.trim()) {
                 alert('Please enter a description');
                 return;
             }
             
-            invoiceData.lineItems.push({ description, amount });
+            invoiceData.lineItems.push({
+                description: description.trim(),
+                amount: amount
+            });
+            
             showInvoiceStep(2);
         }
-
-        function removeLineItem(index) {
-            invoiceData.lineItems.splice(index, 1);
-            showInvoiceStep(2);
-        }
-
-        function editLineItem(index) {
+        
+        function editInvoiceLineItem(index) {
             const item = invoiceData.lineItems[index];
             
             document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Edit Line Item</div>
-                    
+                <h3>Step 2 of 3: Edit Line Item</h3>
+                
+                <div class="section-item">
                     <div class="input-group">
                         <label>Description:</label>
-                        <textarea id="lineDescription" autofocus>${item.description}</textarea>
-                        ${getVoiceButton('lineDescription')}
+                        <textarea id="lineDescription" rows="3" autofocus style="width: 100%; padding: 10px; font-size: 1em; border: 1px solid #ddd; border-radius: 4px; resize: vertical;">${item.description}</textarea>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>
+                            <input type="checkbox" id="useVoice" style="width: auto; margin-right: 8px;">
+                            Enable voice input for description
+                        </label>
                     </div>
                     
                     <div class="input-group">
                         <label>Amount:</label>
-                        <input type="number" id="lineAmount" value="${item.amount}" step="0.01">
+                        <input type="number" id="lineAmount" value="${item.amount}" step="0.01" style="width: 100%; padding: 10px; font-size: 1em;">
                     </div>
                     
                     <div class="button-group">
                         <button class="btn btn-secondary" onclick="showInvoiceStep(2)">Cancel</button>
-                        <button class="btn btn-success" onclick="updateLineItem(${index})">Save Changes</button>
+                        <button class="btn btn-success" onclick="updateInvoiceLineItem(${index})">Save Changes</button>
                     </div>
                 </div>
             `;
         }
-
-        function updateLineItem(index) {
+        
+        function updateInvoiceLineItem(index) {
             const description = document.getElementById('lineDescription').value;
             const amount = parseFloat(document.getElementById('lineAmount').value) || 0;
             
-            if (!description) {
+            if (!description || !description.trim()) {
                 alert('Please enter a description');
                 return;
             }
             
-            // Update the existing line item
-            invoiceData.lineItems[index] = { description, amount };
+            invoiceData.lineItems[index] = {
+                description: description.trim(),
+                amount: amount
+            };
+            
             showInvoiceStep(2);
         }
-
-        function showInvoiceReview() {
-            document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Step 3: Ready to Review</div>
-                    
-                    <p style="margin: 20px 0; color: #666; font-size: 1.1em;">
-                        Your invoice is ready! What would you like to do?
-                    </p>
-                    
-                    <div class="button-group" style="flex-direction: column; gap: 12px;">
-                        <button class="btn btn-secondary" onclick="showInvoiceStep(2)" style="width: 100%;">
-                            ← Back to Line Items
-                        </button>
-                        <button class="btn btn-primary" onclick="showFullInvoiceReview()" style="width: 100%; font-size: 1.1em; padding: 1.2rem;">
-                            👁️ Review Invoice
-                        </button>
-                        <button class="btn btn-danger" onclick="startOver()" style="width: 100%;">
-                            🔄 Start Over
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            // Update preview but keep it hidden until toggle is clicked
-            updateInvoicePreview();
-        }
-
-        function showFullInvoiceReview() {
-            // Show the invoice in the input panel
-            const total = invoiceData.lineItems.reduce((sum, item) => sum + item.amount, 0);
-            const formattedDate = formatDate(invoiceData.date);
-            const company = getCompanyInfo(); // Load company settings
-            
-            document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">📄 Invoice Review</div>
-                    
-                    <div style="background: white; padding: 20px; border-radius: 12px; margin: 20px 0; max-height: 500px; overflow-y: auto;">
-                        <style>
-                            .review-invoice-container {
-                                max-width: 100%;
-                                font-family: Arial, sans-serif;
-                            }
-                            
-                            .review-invoice-header {
-                                margin-bottom: 30px;
-                                padding-bottom: 15px;
-                                border-bottom: 2px solid #333;
-                            }
-                            
-                            .review-company-name {
-                                font-size: 1.3em;
-                                font-weight: bold;
-                                color: #2c3e50;
-                                margin-bottom: 8px;
-                            }
-                            
-                            .review-invoice-title {
-                                font-size: 2em;
-                                font-weight: bold;
-                                color: #2c3e50;
-                                text-align: right;
-                                margin-top: -40px;
-                            }
-                            
-                            .review-invoice-meta {
-                                background: #f8f9fa;
-                                padding: 15px;
-                                border-left: 4px solid #06b6d4;
-                                margin-bottom: 20px;
-                            }
-                            
-                            .review-invoice-meta p {
-                                margin: 5px 0;
-                            }
-                            
-                            .review-line-items {
-                                width: 100%;
-                                border-collapse: collapse;
-                                margin: 20px 0;
-                            }
-                            
-                            .review-line-items th {
-                                background: #2c3e50;
-                                color: white;
-                                padding: 10px;
-                                text-align: left;
-                            }
-                            
-                            .review-line-items td {
-                                padding: 10px;
-                                border-bottom: 1px solid #e0e0e0;
-                            }
-                            
-                            .review-total-row {
-                                background: #f8f9fa;
-                                font-weight: bold;
-                                font-size: 1.2em;
-                            }
-                        </style>
-                        
-                        <div class="review-invoice-container">
-                            <div class="review-invoice-header">
-                                <div class="review-company-name">${company.name}</div>
-                                <div style="color: #666; font-size: 0.9em;">
-                                    ${company.address1}<br>
-                                    ${company.address2}<br>
-                                    ${company.phone}<br>
-                                    ${company.hic}
-                                </div>
-                                <div class="review-invoice-title">INVOICE</div>
-                            </div>
-                            
-                            <div class="review-invoice-meta">
-                                <p><strong>Bill To:</strong> ${invoiceData.client || '[Client Name]'}</p>
-                                <p><strong>Invoice Date:</strong> ${formattedDate || '[Date]'}</p>
-                                <p><strong>Invoice Number:</strong> #${invoiceData.invoiceNumber || '001'}</p>
-                            </div>
-                            
-                            <table class="review-line-items">
-                                <thead>
-                                    <tr>
-                                        <th>Description</th>
-                                        <th style="text-align: right; width: 150px;">Amount</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${invoiceData.lineItems.length > 0 ? invoiceData.lineItems.map(item => `
-                                        <tr>
-                                            <td>${item.description}</td>
-                                            <td style="text-align: right; font-weight: 500;">$${item.amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-                                        </tr>
-                                    `).join('') : `
-                                        <tr>
-                                            <td colspan="2" style="text-align: center; color: #999;">No line items added</td>
-                                        </tr>
-                                    `}
-                                    <tr class="review-total-row">
-                                        <td>TOTAL DUE</td>
-                                        <td style="text-align: right;">$${total.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            
-                            <div style="margin-top: 30px; color: #666; font-size: 0.9em;">
-                                <p><strong>Payment Terms:</strong> Payment due upon receipt</p>
-                                <p>Payments can be made by check unless other arrangements have been made.</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="button-group" style="flex-direction: column;">
-                        <button class="btn btn-success" onclick="finalizeInvoice()" style="width: 100%; font-size: 1.1em; padding: 1.2rem;">
-                            ✓ Looks Good!
-                        </button>
-                        <button class="btn btn-secondary" onclick="showInvoiceStep(3)" style="width: 100%;">
-                            ← Back
-                        </button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function finalizeInvoice() {
-            // Save the invoice number that was actually used (could be auto-suggested or manually edited)
-            const invoiceNum = invoiceData.invoiceNumber.replace(/\D/g, ''); // Extract numbers only
-            if (invoiceNum) {
-                saveInvoiceNumber(invoiceData.client, parseInt(invoiceNum));
+        
+        function removeInvoiceLineItem(index) {
+            if (confirm('Remove this line item?')) {
+                invoiceData.lineItems.splice(index, 1);
+                showInvoiceStep(2);
             }
+        }
+        
+        function showInvoiceReview() {
+            showPreview();
+            updateInvoicePreview();
             
-            // Show export options
             document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">✅ Invoice Saved!</div>
+                <h3>Step 3 of 3: Review Invoice</h3>
+                
+                <div class="section-item">
+                    <p>Review your invoice on the right. When everything looks good, click "Looks Good!" to proceed to export options.</p>
                     
-                    <p style="margin: 20px 0; color: #2ecc71; font-weight: bold; font-size: 1.2em;">
-                        Invoice #${invoiceData.invoiceNumber} has been saved!
-                    </p>
-                    
-                    <p style="margin: 20px 0; color: #666; font-size: 1.1em;">
-                        Choose how you want to export your invoice:
-                    </p>
-                    
-                    <div class="button-group" style="flex-direction: column; gap: 10px;">
-                        <button class="btn btn-success" onclick="exportPDF()" style="width: 100%; padding: 1rem;">
-                            📥 Download PDF
-                        </button>
-                        <button class="btn btn-primary" onclick="printToPDF()" style="width: 100%; padding: 1rem;">
-                            🖨️ Print to PDF
-                        </button>
-                        <button class="btn btn-primary" onclick="saveLocally()" style="width: 100%; padding: 1rem;">
-                            💾 Save Locally (HTML)
-                        </button>
-                        <button class="btn" onclick="emailInvoice()" style="width: 100%; background: #3498db; color: white; padding: 1rem;">
-                            ✉️ Email Invoice
-                        </button>
-                        <button class="btn btn-secondary" onclick="exportWord()" style="width: 100%; padding: 1rem;">
-                            📝 Copy for Word
-                        </button>
-                        <button class="btn btn-danger" onclick="startOver()" style="width: 100%; padding: 1rem; margin-top: 10px;">
-                            🔄 Create New Document
-                        </button>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="showInvoiceStep(2)">← Back to Line Items</button>
+                        <button class="btn btn-success" onclick="saveAndProceedToExport()">Looks Good! →</button>
                     </div>
                 </div>
             `;
         }
-
+        
+        function saveAndProceedToExport() {
+            // Auto-save invoice before proceeding
+            saveInvoiceDraft();
+            showExportOptions();
+        }
+        
         function updateInvoicePreview() {
             const preview = document.getElementById('preview');
+            const formattedDate = invoiceData.date ? invoiceData.date.replace(/-/g, '/').replace(/(\d{4})\/(\d{2})\/(\d{2})/, '$2/$3/$1') : new Date().toLocaleDateString('en-US');
             const total = invoiceData.lineItems.reduce((sum, item) => sum + item.amount, 0);
-            const formattedDate = formatDate(invoiceData.date);
-            const company = getCompanyInfo(); // Load company settings
             
             preview.innerHTML = `
-                <style>
-                    .invoice-container {
-                        max-width: 800px;
-                        margin: 0 auto;
-                        font-family: Arial, sans-serif;
-                        padding: 0;
-                    }
-                    
-                    .invoice-header-section {
-                        margin-bottom: 40px;
-                    }
-                    
-                    .invoice-top {
-                        display: table;
-                        width: 100%;
-                        margin-bottom: 30px;
-                    }
-                    
-                    .invoice-top-left {
-                        display: table-cell;
-                        width: 60%;
-                        vertical-align: top;
-                    }
-                    
-                    .invoice-top-right {
-                        display: table-cell;
-                        width: 40%;
-                        vertical-align: top;
-                        text-align: right;
-                    }
-                    
-                    .invoice-title {
-                        font-size: 2.5em;
-                        font-weight: bold;
-                        color: #2c3e50;
-                        margin-bottom: 10px;
-                    }
-                    
-                    .company-name {
-                        font-size: 1.4em;
-                        font-weight: bold;
-                        color: #2c3e50;
-                        margin-bottom: 8px;
-                    }
-                    
-                    .company-details {
-                        color: #666;
-                        line-height: 1.6;
-                    }
-                    
-                    .invoice-meta {
-                        background: #f8f9fa;
-                        padding: 15px;
-                        border-left: 4px solid #667eea;
-                        margin-bottom: 30px;
-                    }
-                    
-                    .invoice-meta table {
-                        width: 100%;
-                        border-collapse: collapse;
-                    }
-                    
-                    .invoice-meta td {
-                        padding: 5px 0;
-                        vertical-align: top;
-                    }
-                    
-                    .invoice-meta .label-col {
-                        width: 30%;
-                        font-weight: bold;
-                        color: #666;
-                    }
-                    
-                    .invoice-meta .value-col {
-                        width: 70%;
-                        color: #2c3e50;
-                    }
-                    
-                    .line-items-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin: 30px 0;
-                        table-layout: fixed;
-                    }
-                    
-                    .line-items-table thead th {
-                        background: #2c3e50;
-                        color: white;
-                        padding: 12px;
-                        text-align: left;
-                        font-weight: bold;
-                    }
-                    
-                    .line-items-table thead th.amount-col {
-                        text-align: right;
-                        width: 150px;
-                    }
-                    
-                    .line-items-table tbody td {
-                        padding: 12px;
-                        border-bottom: 1px solid #e0e0e0;
-                        word-wrap: break-word;
-                        overflow-wrap: break-word;
-                        word-break: break-word;
-                    }
-                    
-                    .line-items-table tbody td.amount {
-                        text-align: right;
-                        font-weight: 500;
-                        width: 150px;
-                        white-space: nowrap;
-                    }
-                    
-                    .line-items-table .total-row {
-                        background: #f8f9fa;
-                        font-weight: bold;
-                    }
-                    
-                    .line-items-table .total-row td {
-                        padding: 15px 12px;
-                        font-size: 1.2em;
-                        border-bottom: 3px solid #2c3e50;
-                        color: #2c3e50;
-                    }
-                    
-                    .invoice-footer {
-                        margin-top: 50px;
-                        padding-top: 20px;
-                        border-top: 2px solid #e0e0e0;
-                        color: #666;
-                        font-size: 0.9em;
-                        line-height: 1.8;
-                    }
-                    
-                    .invoice-footer p {
-                        margin: 10px 0;
-                    }
-                </style>
-                
-                <div class="invoice-container">
-                    <div class="invoice-header-section">
-                        <div class="invoice-top">
-                            <div class="invoice-top-left">
-                                <div class="company-name">${company.name}</div>
-                                <div class="company-details">
-                                    ${company.address1}<br>
-                                    ${company.address2}<br>
-                                    ${company.phone}<br>
-                                    ${company.hic}
-                                </div>
-                            </div>
-                            <div class="invoice-top-right">
-                                <div class="invoice-title">INVOICE</div>
-                            </div>
-                        </div>
-                        
-                        <div class="invoice-meta">
-                            <table>
-                                <tr>
-                                    <td class="label-col">Bill To:</td>
-                                    <td class="value-col"><strong>${invoiceData.client || '[Client Name]'}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td class="label-col">Invoice Date:</td>
-                                    <td class="value-col">${formattedDate || '[Date]'}</td>
-                                </tr>
-                                <tr>
-                                    <td class="label-col">Invoice Number:</td>
-                                    <td class="value-col"><strong>#${invoiceData.invoiceNumber || '001'}</strong></td>
-                                </tr>
-                            </table>
-                        </div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px; font-family: Arial, sans-serif;">
+                    <div style="text-align: left; font-size: 10.5pt; line-height: 1.8; color: #555;">
+                        <div style="font-size: 15pt; font-weight: bold; margin-bottom: 5px; color: #2c3e50;">${companyInfo.name}</div>
+                        <div>${companyInfo.address1}</div>
+                        <div>${companyInfo.address2}</div>
+                        <div>${companyInfo.phone}</div>
+                        <div>${companyInfo.hic}</div>
                     </div>
-                    
-                    <table class="line-items-table">
-                        <thead>
-                            <tr>
-                                <th>Description</th>
-                                <th class="amount-col">Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${invoiceData.lineItems.length > 0 ? invoiceData.lineItems.map(item => `
-                                <tr>
-                                    <td>${item.description}</td>
-                                    <td class="amount">$${item.amount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                                </tr>
-                            `).join('') : `
-                                <tr>
-                                    <td colspan="2" style="text-align: center; color: #999; padding: 30px;">No line items added</td>
-                                </tr>
-                            `}
-                            <tr class="total-row">
-                                <td>TOTAL DUE</td>
-                                <td class="amount">$${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <div class="invoice-footer">
-                        <p><strong>Payment Terms:</strong> Payment due upon receipt</p>
-                        <p>Payments can be made by check unless other arrangements have been made.</p>
+                    <div>
+                        <h1 style="font-size: 42pt; font-weight: bold; color: #2c3e50; margin: 0; letter-spacing: 2px;">INVOICE</h1>
                     </div>
-                </div>
-            `;
-        }
-
-        // ========== PROPOSAL/CHANGE ORDER FLOW (Same as before) ==========
-        
-        function showProposalStep(step) {
-            currentStep = step;
-            updateProgress();
-            
-            switch(step) {
-                case 1:
-                    showBasicInfo();
-                    break;
-                case 2:
-                    showSectionInput();
-                    break;
-                case 3:
-                    showAdditionalFees();
-                    break;
-                case 4:
-                    showPaymentPlan();
-                    break;
-                case 5:
-                    showNotes();
-                    break;
-                case 6:
-                    showProposalReview();
-                    break;
-            }
-        }
-
-        function showBasicInfo() {
-            const today = new Date().toISOString().split('T')[0];
-            const docLabel = proposalData.documentType === 'proposal' ? 'Proposal' : 'Change Order';
-            
-            document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Basic Information</div>
-                    
-                    <div class="input-group">
-                        <label>${docLabel} Title:</label>
-                        <input type="text" id="proposalTitle" placeholder="e.g., Kitchen Renovation, Repairs & Painting" oninput="updateProposalPreview()">
-                        ${getVoiceButton('proposalTitle')}
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>Date:</label>
-                        <input type="date" id="date" value="${today}" onchange="updateProposalPreview()">
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>Client Name:</label>
-                        <input type="text" id="client" placeholder="e.g., Allegiate Gym" oninput="updateProposalPreview()">
-                        ${getVoiceButton('client')}
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>Address:</label>
-                        <input type="text" id="address" placeholder="e.g., 864 Boston Post Road, Guilford, CT" oninput="updateProposalPreview()">
-                        ${getVoiceButton('address')}
-                    </div>
-                    
-                    <div class="button-group">
-                        <button class="btn btn-primary" onclick="nextProposalStep()">Next →</button>
-                    </div>
-                </div>
-            `;
-            
-            if (proposalData.proposalTitle) document.getElementById('proposalTitle').value = proposalData.proposalTitle;
-            if (proposalData.date) document.getElementById('date').value = proposalData.date;
-            if (proposalData.client) document.getElementById('client').value = proposalData.client;
-            if (proposalData.address) document.getElementById('address').value = proposalData.address;
-            
-            updateProposalPreview();
-        }
-
-        function showSectionInput() {
-            document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Work Sections</div>
-                    
-                    <div id="sectionsList">
-                        ${proposalData.sections.map((section, index) => `
-                            <div class="section-item">
-                                <button class="remove-btn" onclick="removeSection(${index})">×</button>
-                                <h4>${section.name}</h4>
-                                <p><strong>Description:</strong> ${section.description}</p>
-                                <p><strong>Material:</strong> $${section.material.toLocaleString()}</p>
-                                <p><strong>Labor:</strong> $${section.labor.toLocaleString()}</p>
-                                <p><strong>Total:</strong> $${section.total.toLocaleString()}</p>
-                            </div>
-                        `).join('')}
-                    </div>
-                    
-                    <button class="btn btn-success" onclick="addSection()" style="width: 100%; margin-top: 10px;">
-                        + Add Work Section
-                    </button>
-                    
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="prevProposalStep()">← Back</button>
-                        <button class="btn btn-primary" onclick="nextProposalStep()">Next →</button>
-                    </div>
-                </div>
-            `;
-            
-            updateProposalPreview();
-        }
-
-        function addSection() {
-            document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Add Work Section</div>
-                    
-                    <div class="input-group">
-                        <label>Section Name:</label>
-                        <input type="text" id="sectionName" placeholder="e.g., Main Area, Bathroom">
-                        ${getVoiceButton('sectionName')}
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>Work Description:</label>
-                        <textarea id="sectionDescription" placeholder="Describe the work..."></textarea>
-                        ${getVoiceButton('sectionDescription')}
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>Cost Entry Type:</label>
-                        <select id="costType" onchange="toggleCostInputs()">
-                            <option value="breakdown">Separate Material & Labor</option>
-                            <option value="total">Just Total</option>
-                        </select>
-                    </div>
-                    
-                    <div id="breakdownInputs">
-                        <div class="input-group">
-                            <label>Material Cost:</label>
-                            <input type="number" id="material" placeholder="0" value="0" step="0.01">
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>Labor Cost:</label>
-                            <input type="number" id="labor" placeholder="0" value="0" step="0.01">
-                        </div>
-                    </div>
-                    
-                    <div id="totalInput" class="hidden">
-                        <div class="input-group">
-                            <label>Total Cost:</label>
-                            <input type="number" id="totalCost" placeholder="0" value="0" step="0.01">
-                        </div>
-                    </div>
-                    
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="showProposalStep(2)">Cancel</button>
-                        <button class="btn btn-success" onclick="saveSection()">Save Section</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        function toggleCostInputs() {
-            const costType = document.getElementById('costType').value;
-            const breakdownInputs = document.getElementById('breakdownInputs');
-            const totalInput = document.getElementById('totalInput');
-            
-            if (costType === 'breakdown') {
-                breakdownInputs.classList.remove('hidden');
-                totalInput.classList.add('hidden');
-            } else {
-                breakdownInputs.classList.add('hidden');
-                totalInput.classList.remove('hidden');
-            }
-        }
-
-        function saveSection() {
-            const name = document.getElementById('sectionName').value;
-            const description = document.getElementById('sectionDescription').value;
-            const costType = document.getElementById('costType').value;
-            
-            if (!name || !description) {
-                alert('Please fill in section name and description');
-                return;
-            }
-            
-            let material = 0, labor = 0, total = 0;
-            
-            if (costType === 'breakdown') {
-                material = parseFloat(document.getElementById('material').value) || 0;
-                labor = parseFloat(document.getElementById('labor').value) || 0;
-                total = material + labor;
-            } else {
-                total = parseFloat(document.getElementById('totalCost').value) || 0;
-            }
-            
-            proposalData.sections.push({ name, description, material, labor, total });
-            showProposalStep(2);
-        }
-
-        function removeSection(index) {
-            proposalData.sections.splice(index, 1);
-            showProposalStep(2);
-        }
-
-        function showAdditionalFees() {
-            document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Additional Fees</div>
-                    
-                    <div class="input-group">
-                        <label>Dumpster Fee:</label>
-                        <input type="number" id="dumpsterFee" placeholder="0" value="${proposalData.dumpsterFee}" step="0.01" oninput="updateProposalPreview()">
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>Permit Fees:</label>
-                        <input type="number" id="permitFee" placeholder="0" value="${proposalData.permitFee}" step="0.01" oninput="updateProposalPreview()">
-                    </div>
-                    
-                    <div class="input-group">
-                        <label>G.C. Fee:</label>
-                        <input type="number" id="gcFee" placeholder="0" value="${proposalData.gcFee}" step="0.01" oninput="updateProposalPreview()">
-                    </div>
-                    
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="prevProposalStep()">← Back</button>
-                        <button class="btn btn-primary" onclick="saveFeesAndNext()">Next →</button>
-                    </div>
-                </div>
-            `;
-            
-            updateProposalPreview();
-        }
-
-        function saveFeesAndNext() {
-            proposalData.dumpsterFee = parseFloat(document.getElementById('dumpsterFee').value) || 0;
-            proposalData.permitFee = parseFloat(document.getElementById('permitFee').value) || 0;
-            proposalData.gcFee = parseFloat(document.getElementById('gcFee').value) || 0;
-            nextProposalStep();
-        }
-
-        function showPaymentPlan() {
-            document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Payment Plan</div>
-                    
-                    <div class="input-group">
-                        <label>Payment Plan Type:</label>
-                        <select id="paymentType" onchange="togglePaymentInputs()">
-                            <option value="standard">Standard (50%, 25%, 25%)</option>
-                            <option value="custom">Custom Percentages</option>
-                        </select>
-                    </div>
-                    
-                    <div id="customPayment" class="hidden">
-                        <div class="input-group">
-                            <label>First Payment %:</label>
-                            <input type="number" id="percent1" value="50" min="0" max="100" oninput="updateProposalPreview()">
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>Second Payment %:</label>
-                            <input type="number" id="percent2" value="25" min="0" max="100" oninput="updateProposalPreview()">
-                        </div>
-                        
-                        <div class="input-group">
-                            <label>Third Payment %:</label>
-                            <input type="number" id="percent3" value="25" min="0" max="100" oninput="updateProposalPreview()">
-                        </div>
-                    </div>
-                    
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="prevProposalStep()">← Back</button>
-                        <button class="btn btn-primary" onclick="savePaymentAndNext()">Next →</button>
-                    </div>
-                </div>
-            `;
-            
-            updateProposalPreview();
-        }
-
-        function togglePaymentInputs() {
-            const paymentType = document.getElementById('paymentType').value;
-            const customPayment = document.getElementById('customPayment');
-            
-            if (paymentType === 'custom') {
-                customPayment.classList.remove('hidden');
-            } else {
-                customPayment.classList.add('hidden');
-            }
-        }
-
-        function savePaymentAndNext() {
-            const paymentType = document.getElementById('paymentType').value;
-            
-            if (paymentType === 'custom') {
-                proposalData.paymentPlan.percent1 = parseInt(document.getElementById('percent1').value) || 50;
-                proposalData.paymentPlan.percent2 = parseInt(document.getElementById('percent2').value) || 25;
-                proposalData.paymentPlan.percent3 = parseInt(document.getElementById('percent3').value) || 25;
-            }
-            
-            nextProposalStep();
-        }
-
-        function showNotes() {
-            document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">Notes (Optional)</div>
-                    
-                    <div class="input-group">
-                        <label>Additional Notes:</label>
-                        <textarea id="notes" placeholder="Any additional notes..." oninput="updateProposalPreview()">${proposalData.notes}</textarea>
-                        ${getVoiceButton('notes')}
-                    </div>
-                    
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="prevProposalStep()">← Back</button>
-                        <button class="btn btn-primary" onclick="saveNotesAndNext()">Next →</button>
-                    </div>
-                </div>
-            `;
-            
-            updateProposalPreview();
-        }
-
-        function saveNotesAndNext() {
-            proposalData.notes = document.getElementById('notes').value;
-            nextProposalStep();
-        }
-
-        function showProposalReview() {
-            document.getElementById('inputContainer').innerHTML = `
-                <div class="question-box">
-                    <div class="question-text">✅ Review Your ${proposalData.documentType === 'proposal' ? 'Proposal' : 'Change Order'}</div>
-                    
-                    <p style="margin: 20px 0; color: #666;">
-                        Review the preview and choose how to export:
-                    </p>
-                    
-                    <div class="button-group" style="flex-direction: column;">
-                        <button class="btn btn-success" onclick="exportPDF()" style="width: 100%;">
-                            📄 Print to PDF
-                        </button>
-                        <button class="btn btn-primary" onclick="saveLocally()" style="width: 100%;">
-                            💾 Save Locally (HTML)
-                        </button>
-                        <button class="btn" onclick="emailInvoice()" style="width: 100%; background: #3498db; color: white;">
-                            ✉️ Email Document
-                        </button>
-                        <button class="btn btn-secondary" onclick="exportWord()" style="width: 100%;">
-                            📝 Copy for Word
-                        </button>
-                        <button class="btn btn-danger" onclick="startOver()" style="width: 100%;">
-                            🔄 Create New Document
-                        </button>
-                    </div>
-                    
-                    <div class="button-group">
-                        <button class="btn btn-secondary" onclick="prevProposalStep()">← Back</button>
-                    </div>
-                </div>
-            `;
-            
-            updateProposalPreview();
-        }
-
-        function nextProposalStep() {
-            if (currentStep === 1) {
-                proposalData.proposalTitle = document.getElementById('proposalTitle').value;
-                proposalData.date = document.getElementById('date').value;
-                proposalData.client = document.getElementById('client').value;
-                proposalData.address = document.getElementById('address').value;
-            }
-            
-            showProposalStep(currentStep + 1);
-        }
-
-        function prevProposalStep() {
-            showProposalStep(currentStep - 1);
-        }
-
-        function updateProposalPreview() {
-            const preview = document.getElementById('preview');
-            const docTitle = proposalData.proposalTitle || (proposalData.documentType === 'proposal' ? 'Repairs & Painting' : 'Change Order - Repairs & Painting');
-            const company = getCompanyInfo(); // Load company settings
-            
-            const sectionsTotal = proposalData.sections.reduce((sum, s) => sum + s.total, 0);
-            const invoiceTotal = sectionsTotal + proposalData.dumpsterFee + proposalData.permitFee + proposalData.gcFee;
-            
-            const payment1 = (invoiceTotal * proposalData.paymentPlan.percent1 / 100);
-            const payment2 = (invoiceTotal * proposalData.paymentPlan.percent2 / 100);
-            const payment3 = (invoiceTotal * proposalData.paymentPlan.percent3 / 100);
-            
-            const formattedDate = formatDate(proposalData.date);
-            
-            preview.innerHTML = `
-                <style>
-                    /* Prevent page breaks in middle of sections */
-                    .preview {
-                        padding-bottom: 1in;
-                    }
-                    .section-row {
-                        page-break-inside: avoid;
-                    }
-                    table {
-                        page-break-inside: auto;
-                    }
-                    tr {
-                        page-break-inside: avoid;
-                        page-break-after: auto;
-                    }
-                </style>
-                
-                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #333;">
-                    <h3 style="margin: 0; font-size: 1.2em;">${company.name}</h3>
-                    <p style="margin: 3px 0; font-size: 0.9em;">${company.address1}, ${company.address2}</p>
-                    <p style="margin: 3px 0; font-size: 0.9em;">${company.phone} | ${company.hic}</p>
                 </div>
                 
-                <h1 style="text-align: center; margin: 15px 0; font-size: 1.5em;"><strong>${docTitle}</strong></h1>
+                ${invoiceData.isPaid ? `
+                    <div style="text-align: center; margin: 15px 0;">
+                        <div style="display: inline-block; border: 4px solid #28a745; padding: 10px 30px; transform: rotate(-5deg); background: rgba(40, 167, 69, 0.1);">
+                            <span style="color: #28a745; font-size: 24pt; font-weight: bold; letter-spacing: 3px;">PAID</span>
+                        </div>
+                    </div>
+                ` : ''}
                 
-                <div style="margin: 15px 0;">
-                    <p><strong>Date:</strong> ${formattedDate || '[Date]'}</p>
-                    <p><strong>Client:</strong> ${proposalData.client || '[Client]'}</p>
-                    <p><strong>Address:</strong> ${proposalData.address || '[Address]'}</p>
+                <div style="background: #f5f8fa; border-left: 4px solid #5b9bd5; padding: 20px; margin: 25px 0; font-family: Arial, sans-serif; font-size: 10.5pt;">
+                    <div style="display: flex; margin-bottom: 10px;">
+                        <div style="width: 140px; font-weight: bold; color: #555;">Bill To:</div>
+                        <div style="font-weight: bold; color: #2c3e50;">${invoiceData.client || ''}</div>
+                    </div>
+                    <div style="display: flex; margin-bottom: 10px;">
+                        <div style="width: 140px; font-weight: bold; color: #555;">Invoice Date:</div>
+                        <div style="color: #2c3e50;">${formattedDate}</div>
+                    </div>
+                    <div style="display: flex;">
+                        <div style="width: 140px; font-weight: bold; color: #555;">Invoice Number:</div>
+                        <div style="color: #2c3e50; font-weight: bold;">#${invoiceData.invoiceNumber || '001'}</div>
+                    </div>
                 </div>
                 
-                <table>
+                <table class="invoice-table" style="width: 100%; border-collapse: collapse; margin: 25px 0; font-family: Arial, sans-serif; border: none;">
                     <thead>
-                        <tr style="background: white;">
-                            <th></th>
-                            <th>Material</th>
-                            <th>Labor</th>
-                            <th>Total</th>
+                        <tr style="background: #445566; color: white;">
+                            <th style="padding: 14px; text-align: left; font-size: 11pt; font-weight: bold; border: none;">Description</th>
+                            <th style="padding: 14px; text-align: right; font-size: 11pt; font-weight: bold; width: 150px; border: none;">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${proposalData.sections.map(section => {
-                            const descLines = section.description.split('\n').filter(line => line.trim());
-                            const bulletDesc = descLines.map(line => '• ' + line.trim()).join('<br>');
-                            
-                            return `
-                            <tr style="background: #ecf0f1;" class="section-row">
-                                <td><strong>${section.name}</strong></td>
-                                <td></td>
-                                <td></td>
-                                <td><strong>$${section.total.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                        ${invoiceData.lineItems.map(item => `
+                            <tr style="border-bottom: 1px solid #f0f0f0;">
+                                <td style="padding: 14px; font-size: 10.5pt; border-left: none; border-right: none;">${item.description}</td>
+                                <td style="padding: 14px; text-align: right; font-size: 10.5pt; border-left: none; border-right: none;">$${item.amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
                             </tr>
-                            <tr class="section-row">
-                                <td>${bulletDesc}</td>
-                                <td>${section.material > 0 ? '$' + section.material.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</td>
-                                <td>${section.labor > 0 ? '$' + section.labor.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</td>
-                                <td></td>
-                            </tr>
-                            `;
-                        }).join('')}
-                        ${proposalData.dumpsterFee > 0 ? `
-                            <tr>
-                                <td><strong>Dumpster Fee</strong><br>Fees for dumpster and disposal</td>
-                                <td></td>
-                                <td></td>
-                                <td><strong>$${proposalData.dumpsterFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
-                            </tr>
-                        ` : ''}
-                        ${proposalData.permitFee > 0 ? `
-                            <tr>
-                                <td><strong>Permit Fees</strong></td>
-                                <td></td>
-                                <td></td>
-                                <td><strong>$${proposalData.permitFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
-                            </tr>
-                        ` : ''}
-                        ${proposalData.gcFee > 0 ? `
-                            <tr>
-                                <td><strong>G.C. Fees</strong><br>General Contractor Fee</td>
-                                <td></td>
-                                <td></td>
-                                <td><strong>$${proposalData.gcFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
-                            </tr>
-                        ` : ''}
-                        <tr>
-                            <td colspan="3"><strong>Invoice Total: ${formattedDate || new Date().toLocaleDateString()}</strong></td>
-                            <td><strong>$${invoiceTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                        `).join('')}
+                        <tr style="background: white; border-top: 3px solid #445566; border-bottom: 3px solid #445566;">
+                            <td style="padding: 16px; font-size: 12pt; font-weight: bold; color: #2c3e50; border-left: none; border-right: none;">TOTAL DUE</td>
+                            <td style="padding: 16px; text-align: right; font-size: 12pt; font-weight: bold; color: #2c3e50; border-left: none; border-right: none;">$${total.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
                         </tr>
                     </tbody>
                 </table>
                 
-                ${proposalData.notes ? `
-                    <div style="margin: 20px 0;">
-                        <p><strong>Notes:</strong></p>
-                        <p>${proposalData.notes}</p>
-                    </div>
-                ` : ''}
-                
-                <div style="margin: 20px 0;">
-                    <p><strong>Payment Plan:</strong></p>
-                    <ul>
-                        <li>${proposalData.paymentPlan.percent1}% down: $${payment1.toLocaleString('en-US', {minimumFractionDigits: 2})} (Upon Signature)</li>
-                        <li>${proposalData.paymentPlan.percent2}% at halfway point: $${payment2.toLocaleString('en-US', {minimumFractionDigits: 2})}</li>
-                        <li>${proposalData.paymentPlan.percent3}% upon completion: $${payment3.toLocaleString('en-US', {minimumFractionDigits: 2})}</li>
-                    </ul>
-                    <p><strong>Total due: $${invoiceTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></p>
-                </div>
-                
-                <div style="margin-top: 40px;">
-                    <p><strong>Accepted by:</strong></p>
-                    <p><strong>Client:</strong> ${proposalData.client || '[Client]'}</p>
-                    <p style="border-top: 2px solid #000; width: 300px; margin: 20px 0;"></p>
-                    <p><strong>Contractor:</strong> David Gissel</p>
-                    <p style="border-top: 2px solid #000; width: 300px; margin: 20px 0;"></p>
+                <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0; font-family: Arial, sans-serif; font-size: 9.5pt; color: #666; line-height: 1.8;">
+                    <div style="margin-bottom: 8px;"><span style="font-weight: bold; color: #2c3e50;">Payment Terms:</span> Payment due upon receipt</div>
+                    <div>Payments can be made by check unless other arrangements have been made.</div>
                 </div>
             `;
         }
-
-        // ========== SHARED FUNCTIONS ==========
         
-        function updateProgress() {
-            const percent = (currentStep / totalSteps) * 100;
-            document.getElementById('progressFill').style.width = percent + '%';
-            document.getElementById('stepIndicator').textContent = `Step ${currentStep} of ${totalSteps}`;
-        }
+        // ============================================
+        // END INVOICE WORKFLOW
+        // ============================================
 
-        function getVoiceButton(fieldId) {
-            if (!recognition) return '';
+        function showBasicInfo() {
+            hidePreview();
+            const today = new Date().toISOString().split('T')[0];
             
-            return `<button class="voice-btn" onclick="startVoiceInput('${fieldId}', event)">
-                🎤 Use Voice
-            </button>`;
+            document.getElementById('inputContainer').innerHTML = `
+                <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ffc107;">
+                    <button class="btn btn-secondary" onclick="showSavedDrafts()" style="width: 100%; margin-bottom: 8px;">
+                        📁 Load Saved Draft
+                    </button>
+                    <button class="btn btn-success" onclick="saveDraft()" style="width: 100%;">
+                        💾 Save Current Draft
+                    </button>
+                </div>
+                
+                <div class="input-group">
+                    <label>Document Type:</label>
+                    <select id="documentType" onchange="updatePreview()">
+                        <option value="proposal" ${proposalData.documentType === 'proposal' ? 'selected' : ''}>Proposal</option>
+                        <option value="quote" ${proposalData.documentType === 'quote' || !proposalData.documentType ? 'selected' : ''}>Quote</option>
+                        <option value="changeorder" ${proposalData.documentType === 'changeorder' ? 'selected' : ''}>Change Order</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label>Title:</label>
+                    <input type="text" id="proposalTitle" placeholder="e.g., Kitchen Renovation, Repairs, Painting" value="${proposalData.proposalTitle || ''}" oninput="updatePreview()">
+                </div>
+                
+                <div class="input-group">
+                    <label>Date:</label>
+                    <input type="date" id="date" value="${proposalData.date || today}" onchange="updatePreview()">
+                </div>
+                
+                <div class="input-group">
+                    <label>Client Name:</label>
+                    <input type="text" id="client" placeholder="Client name" value="${proposalData.client || ''}" oninput="updatePreview()">
+                </div>
+                
+                <div class="input-group">
+                    <label>Address:</label>
+                    <input type="text" id="address" placeholder="Address" value="${proposalData.address || ''}" oninput="updatePreview()">
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="showSections()">Next: Add Work Sections →</button>
+                </div>
+            `;
+            
+            updatePreview();
         }
 
-        function startVoiceInput(fieldId, event) {
-            if (!recognition) {
-                alert('Voice recognition not supported. Use Chrome, Edge, or Safari.');
+        function showSections() {
+            saveBasicInfo();
+            hidePreview();
+            
+            document.getElementById('inputContainer').innerHTML = `
+                <h3>Work Sections</h3>
+                
+                <button class="btn btn-success" onclick="saveDraft()" style="width: 100%; margin: 10px 0;">
+                    💾 Save Draft
+                </button>
+                
+                <div id="sectionsList"></div>
+                <button class="btn btn-success" onclick="addSection()" style="width: 100%; margin: 10px 0;">+ Add Section</button>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="showBasicInfo()">← Back</button>
+                    <button class="btn btn-primary" onclick="showAdditionalFees()">Next: Additional Fees →</button>
+                </div>
+            `;
+            
+            renderSections();
+        }
+        
+        function showAdditionalFees() {
+            hidePreview();
+            
+            document.getElementById('inputContainer').innerHTML = `
+                <h3>Additional Fees (Optional)</h3>
+                
+                <button class="btn btn-success" onclick="saveDraft()" style="width: 100%; margin: 10px 0;">
+                    💾 Save Draft
+                </button>
+                
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <p style="margin: 0;">Add any additional fees to your quote. Leave blank if not needed.</p>
+                </div>
+                
+                <div class="input-group">
+                    <label>Dumpster Fee:</label>
+                    <input type="number" id="dumpsterFee" placeholder="0.00" value="${proposalData.dumpsterFee || ''}" oninput="saveFees()">
+                </div>
+                <div class="input-group">
+                    <label>Permit Fee:</label>
+                    <input type="number" id="permitFee" placeholder="0.00" value="${proposalData.permitFee || ''}" oninput="saveFees()">
+                </div>
+                <div class="input-group">
+                    <label>G.C. Fee:</label>
+                    <input type="number" id="gcFee" placeholder="0.00" value="${proposalData.gcFee || ''}" oninput="saveFees()">
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="showSections()">← Back</button>
+                    <button class="btn btn-primary" onclick="showPayment()">Next: Payment →</button>
+                </div>
+            `;
+            
+            updatePreview();
+        }
+        
+        function saveFees() {
+            const dumpsterFeeEl = document.getElementById('dumpsterFee');
+            const permitFeeEl = document.getElementById('permitFee');
+            const gcFeeEl = document.getElementById('gcFee');
+            
+            if (dumpsterFeeEl) proposalData.dumpsterFee = parseFloat(dumpsterFeeEl.value) || 0;
+            if (permitFeeEl) proposalData.permitFee = parseFloat(permitFeeEl.value) || 0;
+            if (gcFeeEl) proposalData.gcFee = parseFloat(gcFeeEl.value) || 0;
+            
+            updatePreview();
+        }
+
+        function renderSections() {
+            const container = document.getElementById('sectionsList');
+            if (!container) return;
+            
+            container.innerHTML = proposalData.sections.map((section, sIndex) => {
+                const lineItemsTotal = section.lineItems.reduce((sum, item) => sum + item.total, 0);
+                const sectionLevelTotal = (section.material || 0) + (section.labor || 0) + (section.sectionTotal || 0);
+                const grandTotal = lineItemsTotal + sectionLevelTotal;
+                
+                return `
+                    <div class="section-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h4 style="color: #b7b7b7; margin: 0;">${section.name}</h4>
+                            <div>
+                                <button class="btn btn-success" onclick="editSectionCosts(${sIndex})" style="padding: 6px 12px; font-size: 0.9em;">💰 Section Costs</button>
+                                <button class="btn btn-success" onclick="addLineItem(${sIndex})" style="padding: 6px 12px; font-size: 0.9em;">+ Add Item</button>
+                                <button class="btn btn-secondary" onclick="editSectionName(${sIndex})" style="padding: 6px 12px; font-size: 0.9em;">✏️ Edit Name</button>
+                                <button class="remove-btn" onclick="removeSection(${sIndex})">×</button>
+                            </div>
+                        </div>
+                        
+                        ${sectionLevelTotal > 0 ? `
+                            <div style="background: #e8f5e9; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+                                <strong>Section-Level Costs:</strong><br>
+                                ${section.costOption === 1 ? `
+                                    Total Only: <strong>$${(section.sectionTotal || 0).toFixed(2)}</strong>
+                                ` : `
+                                    Material: ${section.material > 0 ? '$' + section.material.toFixed(2) : '-'} | 
+                                    Labor: ${section.labor > 0 ? '$' + section.labor.toFixed(2) : '-'} | 
+                                    Subtotal: <strong>$${sectionLevelTotal.toFixed(2)}</strong>
+                                `}
+                            </div>
+                        ` : ''}
+                        
+                        ${section.lineItems.length > 0 ? `
+                            <div style="margin-top: 10px;">
+                                <div style="font-size: 0.9em; font-weight: bold; margin-bottom: 5px; color: #666;">Line Items:</div>
+                                ${section.lineItems.map((item, iIndex) => `
+                                    <div class="line-item">
+                                        <div class="line-item-row">
+                                            <div>• ${item.description}</div>
+                                            <div style="text-align: right;">${item.material > 0 ? '$' + item.material.toFixed(2) : '-'}</div>
+                                            <div style="text-align: right;">${item.labor > 0 ? '$' + item.labor.toFixed(2) : '-'}</div>
+                                            <div style="text-align: right;"><strong>$${item.total.toFixed(2)}</strong></div>
+                                            <div>
+                                                <button class="btn btn-secondary" onclick="editLineItem(${sIndex}, ${iIndex})" style="padding: 4px 8px; font-size: 0.85em;">✏️</button>
+                                                <button class="remove-btn" onclick="removeLineItem(${sIndex}, ${iIndex})" style="width: 25px; height: 25px;">×</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                                <div style="text-align: right; margin-top: 5px; font-weight: normal; color: #666; font-size: 0.9em;">
+                                    Line Items Subtotal: $${lineItemsTotal.toFixed(2)}
+                                </div>
+                            </div>
+                        ` : '<p style="color: #999; font-style: italic; margin: 10px 0;">No line items yet</p>'}
+                        
+                        <div style="text-align: right; margin-top: 10px; font-weight: bold; font-size: 1.1em; border-top: 2px solid #ddd; padding-top: 10px;">
+                            Section Total: $${grandTotal.toFixed(2)}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            updatePreview();
+        }
+
+        function addSection() {
+            const name = prompt("Enter section name (e.g., Painting, Electrical):");
+            if (name && name.trim()) {
+                proposalData.sections.push({
+                    name: name.trim(),
+                    material: 0,
+                    labor: 0,
+                    lineItems: []
+                });
+                renderSections();
+            }
+        }
+
+        function editSectionName(sectionIndex) {
+            const section = proposalData.sections[sectionIndex];
+            const newName = prompt("Edit Section Name:", section.name);
+            if (newName && newName.trim()) {
+                proposalData.sections[sectionIndex].name = newName.trim();
+                renderSections();
+            }
+        }
+        
+        function editSectionCosts(sectionIndex) {
+            const section = proposalData.sections[sectionIndex];
+            
+            const costType = prompt("Enter costs as:\n1. Total only\n2. Material and Labor breakdown\n\nEnter 1 or 2:", "1");
+            
+            if (costType === "1") {
+                // Just total
+                const currentTotal = section.sectionTotal || (section.material || 0) + (section.labor || 0);
+                const total = prompt("Section-level Total cost:", currentTotal);
+                if (total === null) return;
+                
+                const totalNum = parseFloat(total) || 0;
+                proposalData.sections[sectionIndex].material = 0;
+                proposalData.sections[sectionIndex].labor = 0;
+                proposalData.sections[sectionIndex].sectionTotal = totalNum;
+                proposalData.sections[sectionIndex].costOption = 1; // Track option
+            } else {
+                // Material and labor breakdown
+                const material = prompt("Section-level Material cost:", section.material || 0);
+                if (material === null) return;
+                
+                const labor = prompt("Section-level Labor cost:", section.labor || 0);
+                if (labor === null) return;
+                
+                proposalData.sections[sectionIndex].material = parseFloat(material) || 0;
+                proposalData.sections[sectionIndex].labor = parseFloat(labor) || 0;
+                proposalData.sections[sectionIndex].sectionTotal = 0;
+                proposalData.sections[sectionIndex].costOption = 2; // Track option
+            }
+            
+            renderSections();
+        }
+
+        function removeSection(index) {
+            if (confirm('Remove this section and all its items?')) {
+                proposalData.sections.splice(index, 1);
+                renderSections();
+            }
+        }
+
+        function addLineItem(sectionIndex) {
+            const description = prompt("Item description:");
+            if (!description || !description.trim()) return;
+            
+            const material = parseFloat(prompt("Material cost (enter 0 if none):", "0") || 0);
+            const labor = parseFloat(prompt("Labor cost (enter 0 if none):", "0") || 0);
+            const total = material + labor;
+            
+            proposalData.sections[sectionIndex].lineItems.push({
+                description: description.trim(),
+                material: material,
+                labor: labor,
+                total: total
+            });
+            
+            renderSections();
+        }
+
+        function editLineItem(sectionIndex, itemIndex) {
+            const item = proposalData.sections[sectionIndex].lineItems[itemIndex];
+            
+            const description = prompt("Edit description:", item.description);
+            if (!description || !description.trim()) return;
+            
+            const material = parseFloat(prompt("Material cost:", item.material) || 0);
+            const labor = parseFloat(prompt("Labor cost:", item.labor) || 0);
+            const total = material + labor;
+            
+            proposalData.sections[sectionIndex].lineItems[itemIndex] = {
+                description: description.trim(),
+                material: material,
+                labor: labor,
+                total: total
+            };
+            
+            renderSections();
+        }
+
+        function removeLineItem(sectionIndex, itemIndex) {
+            if (confirm('Remove this item?')) {
+                proposalData.sections[sectionIndex].lineItems.splice(itemIndex, 1);
+                renderSections();
+            }
+        }
+
+        function saveBasicInfo() {
+            const docTypeEl = document.getElementById('documentType');
+            const titleEl = document.getElementById('proposalTitle');
+            const dateEl = document.getElementById('date');
+            const clientEl = document.getElementById('client');
+            const addressEl = document.getElementById('address');
+            
+            if (docTypeEl) proposalData.documentType = docTypeEl.value;
+            if (titleEl) proposalData.proposalTitle = titleEl.value;
+            if (dateEl) proposalData.date = dateEl.value;
+            if (clientEl) proposalData.client = clientEl.value;
+            if (addressEl) proposalData.address = addressEl.value;
+        }
+
+        function showPayment() {
+            saveBasicInfo();
+            hidePreview();
+            
+            document.getElementById('inputContainer').innerHTML = `
+                <h3>Payment Plan & Notes</h3>
+                
+                <button class="btn btn-success" onclick="saveDraft()" style="width: 100%; margin: 10px 0;">
+                    💾 Save Draft
+                </button>
+                
+                <div id="paymentsList"></div>
+                
+                <button class="btn btn-success" onclick="addPayment()" style="width: 100%; margin: 10px 0;">+ Add Payment</button>
+                
+                <div id="paymentTotal" style="padding: 10px; background: #f0f0f0; border-radius: 5px; margin: 10px 0; font-weight: bold;"></div>
+                
+                <div class="input-group">
+                    <label>Notes (optional):</label>
+                    <textarea id="notes" placeholder="Additional notes...">${proposalData.notes}</textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="showSections()">← Back</button>
+                    <button class="btn btn-primary" onclick="reviewProposal()">Review Proposal/Quote →</button>
+                </div>
+            `;
+            
+            renderPayments();
+            updatePreview();
+        }
+        
+        function renderPayments() {
+            const container = document.getElementById('paymentsList');
+            if (!container) return;
+            
+            container.innerHTML = proposalData.paymentPlan.map((payment, index) => `
+                <div class="input-group" style="display: flex; gap: 10px; align-items: flex-end;">
+                    <div style="flex: 2;">
+                        <label>Payment ${index + 1} Label:</label>
+                        <input type="text" value="${payment.label}" onchange="updatePaymentLabel(${index}, this.value)" placeholder="e.g., Down Payment">
+                    </div>
+                    <div style="flex: 1;">
+                        <label>Percent (%):</label>
+                        <input type="number" value="${payment.percent}" onchange="updatePaymentPercent(${index}, this.value)" min="0" max="100" step="1">
+                    </div>
+                    <button class="btn btn-danger" onclick="removePayment(${index})" style="padding: 12px 16px;">×</button>
+                </div>
+            `).join('');
+            
+            updatePaymentTotal();
+        }
+        
+        function updatePaymentLabel(index, label) {
+            proposalData.paymentPlan[index].label = label;
+            updatePreview();
+        }
+        
+        function updatePaymentPercent(index, percent) {
+            proposalData.paymentPlan[index].percent = parseFloat(percent) || 0;
+            updatePaymentTotal();
+            updatePreview();
+        }
+        
+        function updatePaymentTotal() {
+            const total = proposalData.paymentPlan.reduce((sum, p) => sum + p.percent, 0);
+            const display = document.getElementById('paymentTotal');
+            if (!display) return;
+            
+            if (total === 100) {
+                display.innerHTML = `Total: ${total}% ✅ Perfect!`;
+                display.style.background = '#d4edda';
+                display.style.color = '#155724';
+            } else if (total > 100) {
+                display.innerHTML = `Total: ${total}% ⚠️ Over 100%!`;
+                display.style.background = '#f8d7da';
+                display.style.color = '#721c24';
+            } else {
+                display.innerHTML = `Total: ${total}% ⚠️ Need ${100 - total}% more`;
+                display.style.background = '#fff3cd';
+                display.style.color = '#856404';
+            }
+        }
+        
+        function addPayment() {
+            const remaining = 100 - proposalData.paymentPlan.reduce((sum, p) => sum + p.percent, 0);
+            proposalData.paymentPlan.push({
+                label: proposalData.paymentPlan.length === 1 ? '2nd Payment' : `Payment ${proposalData.paymentPlan.length + 1}`,
+                percent: Math.max(0, remaining)
+            });
+            renderPayments();
+        }
+        
+        function removePayment(index) {
+            if (proposalData.paymentPlan.length <= 1) {
+                alert('Must have at least one payment!');
+                return;
+            }
+            proposalData.paymentPlan.splice(index, 1);
+            renderPayments();
+        }
+
+        function reviewProposal() {
+            const notesEl = document.getElementById('notes');
+            if (notesEl) proposalData.notes = notesEl.value;
+            
+            // Check if payment plan equals 100%
+            const total = proposalData.paymentPlan.reduce((sum, p) => sum + p.percent, 0);
+            if (total !== 100) {
+                alert(`Payment plan must equal 100%. Current total: ${total}%`);
                 return;
             }
             
-            const btn = event.target;
-            btn.classList.add('listening');
-            btn.textContent = '🎤 Listening...';
+            // Show the preview
+            showPreview();
             
-            recognition.onresult = (e) => {
-                const transcript = e.results[0][0].transcript;
-                const field = document.getElementById(fieldId);
-                field.value = transcript;
+            document.getElementById('inputContainer').innerHTML = `
+                <h3>📋 Review Your ${proposalData.documentType === 'quote' ? 'Quote' : proposalData.documentType === 'proposal' ? 'Proposal' : 'Change Order'}</h3>
                 
-                // Trigger appropriate update
-                if (documentType === 'invoice') {
-                    if (fieldId === 'invoiceClient') updateClientAndNumber();
-                    else updateInvoicePreview();
-                } else {
-                    updateProposalPreview();
-                }
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <p style="margin: 0; font-weight: bold;">✅ Document Preview</p>
+                    <p style="margin: 5px 0 0 0;">
+                        <span class="desktop-only">Review the preview on the right →</span>
+                        <span class="mobile-only">Scroll down to see the full document below ↓</span>
+                    </p>
+                </div>
                 
-                btn.classList.remove('listening');
-                btn.textContent = '🎤 Use Voice';
-            };
-            
-            recognition.onerror = () => {
-                btn.classList.remove('listening');
-                btn.textContent = '🎤 Use Voice';
-            };
-            
-            recognition.onend = () => {
-                btn.classList.remove('listening');
-                btn.textContent = '🎤 Use Voice';
-            };
-            
-            recognition.start();
-        }
-
-        function printToPDF() {
-            // Browser's print dialog respects CSS page-break rules perfectly
-            window.print();
+                <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #ddd; margin: 15px 0;">
+                    <h4 style="margin-top: 0;">📊 Document Summary:</h4>
+                    <p><strong>Client:</strong> ${proposalData.client || '[Not set]'}</p>
+                    <p><strong>Sections:</strong> ${proposalData.sections.length}</p>
+                    <p><strong>Total Amount:</strong> $${calculateGrandTotal().toFixed(2)}</p>
+                    <p><strong>Payments:</strong> ${proposalData.paymentPlan.length}</p>
+                </div>
+                
+                <div class="button-group" style="flex-direction: column; gap: 15px;">
+                    <button class="btn btn-primary" onclick="showExportOptions()" style="width: 100%; font-size: 1.1em; padding: 15px;">
+                        ✅ Looks Good - Export Document
+                    </button>
+                    <button class="btn btn-secondary" onclick="showPayment()" style="width: 100%;">
+                        ✏️ Needs Update - Go Back
+                    </button>
+                </div>
+            `;
         }
         
-        function exportPDF() {
-            const preview = document.getElementById('preview');
-            const previewPanel = document.getElementById('previewPanel');
-            const docType = documentType === 'invoice' ? 'Invoice' : (proposalData.documentType === 'proposal' ? 'Proposal' : 'Change Order');
-            const client = documentType === 'invoice' ? invoiceData.client : proposalData.client;
-            const invoiceNum = documentType === 'invoice' ? invoiceData.invoiceNumber : '';
+        function calculateGrandTotal() {
+            const sectionsTotal = proposalData.sections.reduce((sum, section) => {
+                const lineItemsTotal = section.lineItems.reduce((itemSum, item) => itemSum + item.total, 0);
+                const sectionLevelTotal = (section.material || 0) + (section.labor || 0) + (section.sectionTotal || 0);
+                return sum + lineItemsTotal + sectionLevelTotal;
+            }, 0);
+            return sectionsTotal + proposalData.dumpsterFee + proposalData.permitFee + proposalData.gcFee;
+        }
+        
+        function showExportOptions() {
+            document.getElementById('inputContainer').innerHTML = `
+                <h3>📤 Export Your Document</h3>
+                
+                <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid #28a745;">
+                    <p style="margin: 0; color: #155724; font-weight: bold;">✅ Document Ready!</p>
+                    <p style="margin: 5px 0 0 0; color: #155724;">Choose how you want to export your ${proposalData.documentType}.</p>
+                </div>
+                
+                <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin: 15px 0; border: 1px solid #ffc107;">
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-success" onclick="loadSavedDocument()" style="flex: 1;">
+                            📁 Load Saved ${proposalData.documentType === 'invoice' ? 'Invoice' : 'Document'}
+                        </button>
+                        <button class="btn btn-danger" onclick="startOver()" style="flex: 1;">
+                            🔄 Start Over
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="section-item" style="margin: 15px 0;">
+                    <h4 style="margin-bottom: 15px;">Export Options:</h4>
+                    
+                    <button class="btn btn-primary" onclick="downloadPDF()" style="width: 100%; margin: 8px 0; padding: 15px; font-size: 1em;">
+                        📥 Download as PDF
+                    </button>
+                    
+                    <button class="btn btn-primary" onclick="printPDF()" style="width: 100%; margin: 8px 0; padding: 15px; font-size: 1em;">
+                        🖨️ Print PDF
+                    </button>
+                    
+                    <button class="btn btn-primary" onclick="saveLocally()" style="width: 100%; margin: 8px 0; padding: 15px; font-size: 1em;">
+                        💾 Save Locally (HTML)
+                    </button>
+                    
+                    <button class="btn btn-success" onclick="saveDraft()" style="width: 100%; margin: 8px 0; padding: 15px; font-size: 1em;">
+                        📁 Save Draft (Edit Later)
+                    </button>
+                    
+                    <button class="btn btn-primary" onclick="emailInvoice()" style="width: 100%; margin: 8px 0; padding: 15px; font-size: 1em;">
+                        📧 Email Invoice
+                    </button>
+                    
+                    <button class="btn btn-primary" onclick="copyForWord()" style="width: 100%; margin: 8px 0; padding: 15px; font-size: 1em;">
+                        📄 Copy for Word
+                    </button>
+                    
+                    <button class="btn ${(proposalData.documentType === 'invoice' ? invoiceData.isPaid : proposalData.isPaid) ? 'btn-success' : 'btn-secondary'}" onclick="togglePaidStatus()" style="width: 100%; margin: 8px 0; padding: 15px; font-size: 1em;">
+                        ${(proposalData.documentType === 'invoice' ? invoiceData.isPaid : proposalData.isPaid) ? '✅ Marked as PAID' : '💰 Mark as Paid'}
+                    </button>
+                </div>
+                
+                <div class="button-group" style="margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="backToReview()">← Back to Review</button>
+                    <button class="btn btn-success" onclick="startNew()">✨ Start New Document</button>
+                </div>
+            `;
+        }
+        
+        function backToReview() {
+            // Route to correct review screen based on document type
+            if (proposalData.documentType === 'invoice') {
+                showInvoiceStep(3);
+            } else {
+                reviewProposal();
+            }
+        }
+        
+        function loadSavedDocument() {
+            // Route to correct load screen based on document type
+            if (proposalData.documentType === 'invoice') {
+                showSavedInvoices();
+            } else {
+                showSavedDrafts();
+            }
+        }
+        
+        function startOver() {
+            if (confirm('Start over? This will clear the current document (saved drafts will not be affected).')) {
+                // Reset data
+                if (proposalData.documentType === 'invoice') {
+                    invoiceData.date = '';
+                    invoiceData.client = '';
+                    invoiceData.invoiceNumber = '';
+                    invoiceData.lineItems = [];
+                    invoiceData.isPaid = false;
+                    showInvoiceStep(1);
+                } else {
+                    location.reload();
+                }
+            }
+        }
+        
+        function downloadPDF() {
+            const docType = proposalData.documentType;
+            const client = (docType === 'invoice') ? invoiceData.client : proposalData.client;
+            const invoiceNum = (docType === 'invoice') ? invoiceData.invoiceNumber : '';
             
             // Create filename
-            const filename = documentType === 'invoice' 
+            const filename = (docType === 'invoice') 
                 ? `Invoice_${invoiceNum}_${client.replace(/\s+/g, '_')}.pdf`
                 : `${docType}_${client.replace(/\s+/g, '_')}.pdf`;
             
@@ -2647,9 +1610,10 @@ Version 1.0 - [Original Release]
             tempContainer.style.backgroundColor = '#ffffff';
             tempContainer.style.padding = '20px';
             tempContainer.style.overflow = 'visible';
+            tempContainer.style.fontFamily = 'Arial, sans-serif';
             
-            // Clone the preview content
-            tempContainer.innerHTML = preview.innerHTML;
+            // Clone the preview content exactly as is
+            tempContainer.innerHTML = document.getElementById('preview').innerHTML;
             document.body.appendChild(tempContainer);
             
             // Wait for content to render
@@ -2668,7 +1632,8 @@ Version 1.0 - [Original Release]
                     document.body.removeChild(tempContainer);
                     
                     const imgData = canvas.toDataURL('image/png');
-                    const pdf = new jspdf.jsPDF('p', 'mm', 'letter');
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'letter');
                     
                     // Letter size dimensions
                     const pageWidth = 215.9;
@@ -2677,48 +1642,36 @@ Version 1.0 - [Original Release]
                     const contentWidth = pageWidth - (2 * margin);
                     const contentHeight = pageHeight - (2 * margin);
                     
-                    // Calculate image dimensions at current scale
+                    // Calculate image dimensions
                     let imgWidth = contentWidth;
                     let imgHeight = (canvas.height * imgWidth) / canvas.width;
                     
-                    // SMART FITTING: If content is close to fitting on one page (within 30%), 
-                    // scale it down to fit rather than splitting across two pages
+                    // Smart fitting: if close to fitting, scale down to fit on one page
                     if (imgHeight > contentHeight && imgHeight <= contentHeight * 1.30) {
-                        // Content is 0-30% too tall - scale it down to fit on one page
                         const scaleFactor = contentHeight / imgHeight;
                         imgHeight = contentHeight;
                         imgWidth = imgWidth * scaleFactor;
-                        
-                        // Center horizontally if scaled down
                         const xOffset = (contentWidth - imgWidth) / 2;
                         pdf.addImage(imgData, 'PNG', margin + xOffset, margin, imgWidth, imgHeight);
-                        
-                        console.log('PDF: Content scaled to fit on single page');
                     } 
                     else if (imgHeight <= contentHeight) {
-                        // Content easily fits on one page
+                        // Fits on one page
                         pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
-                        
-                        console.log('PDF: Content fits on single page');
                     } 
                     else {
-                        // Content is significantly longer - needs multiple pages
+                        // Multiple pages needed
                         let yPosition = 0;
                         let heightRemaining = imgHeight;
                         
-                        // Add first page
                         pdf.addImage(imgData, 'PNG', margin, margin, imgWidth, imgHeight);
                         heightRemaining -= contentHeight;
                         
-                        // Add subsequent pages
                         while (heightRemaining > 0) {
                             yPosition -= contentHeight;
                             pdf.addPage();
                             pdf.addImage(imgData, 'PNG', margin, margin + yPosition, imgWidth, imgHeight);
                             heightRemaining -= contentHeight;
                         }
-                        
-                        console.log('PDF: Content spans multiple pages');
                     }
                     
                     // Download the PDF
@@ -2729,142 +1682,237 @@ Version 1.0 - [Original Release]
                     if (document.body.contains(tempContainer)) {
                         document.body.removeChild(tempContainer);
                     }
-                    
                     console.error('PDF generation error:', error);
                     alert('Error generating PDF. Please try using Print to PDF instead (Ctrl+P).');
                 });
             }, 500); // Wait for render
         }
-
+        
+        function printPDF() {
+            window.print();
+        }
+        
         function saveLocally() {
-            const preview = document.getElementById('preview');
-            const docType = documentType === 'invoice' ? 'Invoice' : (proposalData.documentType === 'proposal' ? 'Proposal' : 'Change Order');
-            const client = documentType === 'invoice' ? invoiceData.client : proposalData.client;
-            const invoiceNum = documentType === 'invoice' ? invoiceData.invoiceNumber : '';
+            const html = document.getElementById('preview').innerHTML;
+            const blob = new Blob([`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${proposalData.proposalTitle || 'Document'}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #ddd; }
+                        th { background: white; font-weight: bold; text-align: right; }
+                        th:first-child { text-align: left; }
+                        td { text-align: right; }
+                        td:first-child { text-align: left; }
+                        .section-header { background: #d3d3d3; font-weight: bold; }
+                        .invoice-total-row { background: #999999; color: white; font-weight: bold; }
+                    </style>
+                </head>
+                <body>${html}</body>
+                </html>
+            `], { type: 'text/html' });
             
-            // Create filename
-            const filename = documentType === 'invoice' 
-                ? `Invoice_${invoiceNum}_${client.replace(/\s+/g, '_')}.html`
-                : `${docType}_${client.replace(/\s+/g, '_')}.html`;
-            
-            // Create full HTML document
-            const fullHTML = `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${docType} - ${client}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        table th,
-        table td {
-            border: 1px solid #ddd;
-            padding: 12px;
-            text-align: left;
-        }
-        table th {
-            background: #ecf0f1;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-${preview.innerHTML}
-</body>
-</html>`;
-            
-            // Create blob and download
-            const blob = new Blob([fullHTML], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
+            a.download = `${proposalData.proposalTitle || 'document'}.html`;
             a.click();
-            document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            alert(`✅ Saved as ${filename}\n\nThe file has been downloaded to your Downloads folder.\n\nYou can:\n• Open it in any browser\n• Print to PDF from there\n• Email it as an attachment`);
+            alert('✅ HTML file saved! You can open it in any browser.');
         }
-
+        
         function emailInvoice() {
+            const subject = encodeURIComponent(proposalData.proposalTitle || 'Quote/Proposal');
+            const body = encodeURIComponent(`Please find attached the ${proposalData.documentType} for ${proposalData.client}.\n\nTotal Amount: $${calculateGrandTotal().toFixed(2)}\n\nThank you!`);
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+        
+        function copyForWord() {
             const preview = document.getElementById('preview');
-            const docType = documentType === 'invoice' ? 'Invoice' : (proposalData.documentType === 'proposal' ? 'Proposal' : 'Change Order');
-            const client = documentType === 'invoice' ? invoiceData.client : proposalData.client;
-            const invoiceNum = documentType === 'invoice' ? invoiceData.invoiceNumber : '';
+            const range = document.createRange();
+            range.selectNode(preview);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
             
-            // Get email body (simplified version without complex HTML)
-            const emailBody = preview.innerText;
-            
-            // Create mailto link
-            const subject = documentType === 'invoice' 
-                ? `Invoice #${invoiceNum} - ${client}`
-                : `${docType} - ${client}`;
-            
-            const body = encodeURIComponent(emailBody);
-            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${body}`;
-            
-            // Try to open email client
             try {
-                window.location.href = mailtoLink;
-                
-                // Show additional instructions
-                setTimeout(() => {
-                    alert(`📧 Email Instructions:\n\n1. Your default email app should open\n2. Add recipient email address\n3. The invoice is in the email body\n\n💡 Tip: For better formatting, use "Save Locally" then attach the HTML file to your email instead!`);
-                }, 500);
-            } catch (error) {
-                alert(`❌ Could not open email client.\n\nAlternative methods:\n\n1. Use "Save Locally" button\n2. Attach the saved HTML file to your email\n\nOR\n\n1. Use "Copy for Word" button  \n2. Paste into email\n3. Format will be preserved`);
+                document.execCommand('copy');
+                alert('✅ Content copied! Paste it into Microsoft Word (Ctrl+V or Cmd+V)');
+            } catch (err) {
+                alert('❌ Copy failed. Please manually select and copy the preview.');
             }
+            
+            window.getSelection().removeAllRanges();
         }
-
-        function exportWord() {
-            const preview = document.getElementById('preview');
-            const previewHTML = preview.innerHTML;
-            
-            // Try to copy HTML to clipboard
-            const blob = new Blob([previewHTML], { type: 'text/html' });
-            const clipboardItem = new ClipboardItem({ 'text/html': blob });
-            
-            navigator.clipboard.write([clipboardItem]).then(() => {
-                alert('✅ Invoice copied to clipboard!\n\nNow:\n1. Open Microsoft Word\n2. Press Ctrl+V (or Cmd+V on Mac)\n3. The formatted invoice will paste in!');
-            }).catch(() => {
-                // Fallback: show the HTML
-                alert('To export to Word:\n\n1. Right-click the preview on the right\n2. Select "Copy"\n3. Open Microsoft Word\n4. Paste (Ctrl+V or Cmd+V)\n\nThe formatting will be preserved!');
-            });
-        }
-
-        function toggleMobilePreview() {
-            const previewPanel = document.getElementById('previewPanel');
-            previewPanel.classList.toggle('show-mobile-preview');
-            
-            // Scroll to preview if showing
-            if (previewPanel.classList.contains('show-mobile-preview')) {
-                previewPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        function togglePaidStatus() {
+            if (proposalData.documentType === 'invoice') {
+                invoiceData.isPaid = !invoiceData.isPaid;
+                if (invoiceData.isPaid) {
+                    alert('✅ Invoice marked as PAID!');
+                } else {
+                    alert('Invoice unmarked as paid.');
+                }
+                updateInvoicePreview();
+            } else {
+                proposalData.isPaid = !proposalData.isPaid;
+                if (proposalData.isPaid) {
+                    alert('✅ Document marked as PAID!');
+                } else {
+                    alert('Document unmarked as paid.');
+                }
+                updatePreview();
             }
+            showExportOptions(); // Refresh the screen to update button
         }
-
-        function startOver() {
-            if (confirm('Start over? All data will be lost.')) {
+        
+        function startNew() {
+            if (confirm('Start a new document? Current document will be lost.')) {
                 location.reload();
             }
         }
-        
-        // Verify file loaded correctly
-        console.log('✅ SmartPro v2.4.2 loaded successfully!');
-        console.log('🔄 COMPLETE REWRITE: PDF generation using temp container');
-        console.log('📄 New approach avoids all parent container constraints');
-        console.log('✨ Should finally fix the PDF cutoff issue!');
-        console.log('⚙️ Company Settings available - click to customize');
+
+        function updatePreview() {
+            const preview = document.getElementById('preview');
+            const docTypeLabel = proposalData.documentType === 'invoice' ? 'Invoice' : 
+                                 (proposalData.documentType === 'proposal' ? 'Proposal' : 'Change Order');
+            const docTitle = proposalData.proposalTitle || `Renovations ${docTypeLabel}`;
+            const formattedDate = proposalData.date ? new Date(proposalData.date).toLocaleDateString() : new Date().toLocaleDateString();
+            
+            // Calculate total including section-level costs
+            const sectionsTotal = proposalData.sections.reduce((sum, section) => {
+                const lineItemsTotal = section.lineItems.reduce((itemSum, item) => itemSum + item.total, 0);
+                const sectionLevelTotal = (section.material || 0) + (section.labor || 0) + (section.sectionTotal || 0);
+                return sum + lineItemsTotal + sectionLevelTotal;
+            }, 0);
+            const invoiceTotal = sectionsTotal + proposalData.dumpsterFee + proposalData.permitFee + proposalData.gcFee;
+            
+            preview.innerHTML = `
+                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #333; font-size: 10pt;">
+                    <h3 style="margin: 0; font-size: 11pt; font-weight: normal;">${companyInfo.name}</h3>
+                    <p style="margin: 3px 0; font-size: 10pt;">${companyInfo.address1}, ${companyInfo.address2} ${companyInfo.phone}</p>
+                </div>
+                
+                <h1 style="text-align: center; margin: 15px 0; font-size: 12pt; font-weight: bold;">${docTitle}</h1>
+                
+                ${proposalData.isPaid ? `
+                    <div style="text-align: center; margin: 15px 0;">
+                        <div style="display: inline-block; border: 4px solid #28a745; padding: 10px 30px; transform: rotate(-5deg); background: rgba(40, 167, 69, 0.1);">
+                            <span style="color: #28a745; font-size: 24pt; font-weight: bold; letter-spacing: 3px;">PAID</span>
+                        </div>
+                    </div>
+                ` : ''}
+                
+                <div style="margin: 15px 0; font-size: 10pt;">
+                    <p style="margin: 3px 0;"><strong>Date:</strong> ${formattedDate}</p>
+                    <p style="margin: 3px 0;"><strong>Client:</strong> ${proposalData.client || '[Client]'}</p>
+                    <p style="margin: 3px 0;"><strong>Address:</strong> ${proposalData.address || '[Address]'}</p>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 55%; text-align: left;"></th>
+                            <th style="width: 14%; text-align: right;">Material</th>
+                            <th style="width: 14%; text-align: right;">Labor</th>
+                            <th style="width: 17%; text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${proposalData.sections.map(section => {
+                            // Calculate sums of all line items
+                            const lineItemsMaterialSum = section.lineItems.reduce((sum, item) => sum + (item.material || 0), 0);
+                            const lineItemsLaborSum = section.lineItems.reduce((sum, item) => sum + (item.labor || 0), 0);
+                            const lineItemsTotal = section.lineItems.reduce((sum, item) => sum + item.total, 0);
+                            
+                            // Only add section costs to Material/Labor if option 2 was used
+                            // If option 1 (total only), add to grand total but not to Material/Labor columns
+                            const sectionMaterialForColumn = (section.costOption === 2) ? (section.material || 0) : 0;
+                            const sectionLaborForColumn = (section.costOption === 2) ? (section.labor || 0) : 0;
+                            const sectionTotalOnly = (section.costOption === 1) ? (section.sectionTotal || 0) : 0;
+                            
+                            const totalMaterial = lineItemsMaterialSum + sectionMaterialForColumn;
+                            const totalLabor = lineItemsLaborSum + sectionLaborForColumn;
+                            const grandTotal = lineItemsTotal + sectionMaterialForColumn + sectionLaborForColumn + sectionTotalOnly;
+                            
+                            return `
+                                <tr class="section-header">
+                                    <td><strong>${section.name}</strong></td>
+                                    <td><strong>${totalMaterial > 0 ? '$ ' + totalMaterial.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</strong></td>
+                                    <td><strong>${totalLabor > 0 ? '$ ' + totalLabor.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</strong></td>
+                                    <td><strong>$ ${grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                                </tr>
+                                ${section.lineItems.map(item => `
+                                    <tr>
+                                        <td>${item.description}</td>
+                                        <td>${item.material > 0 ? '$ ' + item.material.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</td>
+                                        <td>${item.labor > 0 ? '$ ' + item.labor.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</td>
+                                        <td></td>
+                                    </tr>
+                                `).join('')}
+                            `;
+                        }).join('')}
+                        ${proposalData.dumpsterFee > 0 ? `
+                            <tr class="section-header">
+                                <td><strong>Dumpster Fee</strong></td>
+                                <td></td>
+                                <td></td>
+                                <td><strong>$ ${proposalData.dumpsterFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                            </tr>
+                        ` : ''}
+                        ${proposalData.permitFee > 0 ? `
+                            <tr class="section-header">
+                                <td><strong>Permit Fee</strong></td>
+                                <td></td>
+                                <td></td>
+                                <td><strong>$ ${proposalData.permitFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                            </tr>
+                        ` : ''}
+                        ${proposalData.gcFee > 0 ? `
+                            <tr class="section-header">
+                                <td><strong>G.C. Fee</strong></td>
+                                <td></td>
+                                <td></td>
+                                <td><strong>$ ${proposalData.gcFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                            </tr>
+                        ` : ''}
+                        <tr class="invoice-total-row">
+                            <td colspan="3"><strong>Invoice Total: ${formattedDate}</strong></td>
+                            <td><strong>$ ${invoiceTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                ${proposalData.notes ? `
+                    <div style="margin: 20px 0; font-size: 10pt;">
+                        <p style="margin: 3px 0;"><strong>Notes:</strong></p>
+                        <p style="margin: 3px 0;">${proposalData.notes}</p>
+                    </div>
+                ` : ''}
+                
+                <div style="margin: 20px 0; font-size: 10pt;">
+                    <p style="margin: 3px 0;"><strong>Payment Plan:</strong></p>
+                    <ul style="margin: 5px 0 5px 20px;">
+                        ${proposalData.paymentPlan.map(payment => {
+                            const amount = invoiceTotal * (payment.percent / 100);
+                            return `<li style="margin: 2px 0;">${payment.label}: ${payment.percent}% - $${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</li>`;
+                        }).join('')}
+                    </ul>
+                    <p style="margin: 3px 0;"><strong>Total due: $${invoiceTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></p>
+                </div>
+                
+                <div style="margin-top: 40px; font-size: 10pt;">
+                    <p style="margin: 3px 0;"><strong>Accepted by:</strong></p>
+                    <p style="margin: 10px 0 3px 0;"><strong>Client:</strong> ${proposalData.client || '[Client]'} <span style="margin-left: 50px;"><strong>Date:</strong></span></p>
+                    <p style="border-top: 2px solid #000; width: 300px; margin: 20px 0;"></p>
+                    <p style="margin: 10px 0 3px 0;"><strong>Contractor:</strong> David Gissel <span style="margin-left: 50px;"><strong>Date:</strong></span></p>
+                    <p style="border-top: 2px solid #000; width: 300px; margin: 20px 0;"></p>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>
