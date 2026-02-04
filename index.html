@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartPro - Document Generator v5.6</title>
+    <title>SmartPro - Document Generator v5.17</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
@@ -332,9 +332,265 @@
             display: none;
         }
 
+        /* ========================================
+           MOBILE RESPONSIVE STYLES
+           ======================================== */
+        
         @media (max-width: 1024px) {
             .container {
                 grid-template-columns: 1fr;
+            }
+            
+            /* Mobile preview adjustments */
+            .preview {
+                padding: 20px;
+                font-size: 9pt;
+                overflow-x: auto;
+            }
+            
+            /* Preview panel on mobile */
+            #previewPanel {
+                max-width: 100%;
+                overflow-x: hidden;
+            }
+            
+            #previewPanel .preview {
+                max-width: 100%;
+                overflow-x: auto;
+            }
+            
+            /* Make buttons full width on mobile */
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .button-group .btn {
+                width: 100%;
+            }
+            
+            /* Export buttons full width */
+            .section-item button {
+                width: 100%;
+                margin: 5px 0 !important;
+            }
+            
+            /* Larger touch targets */
+            .btn {
+                padding: 15px 20px;
+                font-size: 1.1em;
+                min-height: 50px;
+            }
+            
+            /* Mobile heading sizes */
+            h2 {
+                font-size: 1.5em;
+            }
+            
+            h3 {
+                font-size: 1.2em;
+            }
+            
+            /* Input fields larger on mobile */
+            input[type="text"],
+            input[type="date"],
+            input[type="number"],
+            textarea,
+            select {
+                font-size: 16px; /* Prevents zoom on iOS */
+                padding: 15px;
+            }
+            
+            /* Line item adjustments */
+            .line-item {
+                padding: 15px 10px;
+            }
+            
+            /* Remove button larger */
+            .remove-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.5em;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .panel {
+                padding: 15px;
+                border-radius: 10px;
+            }
+            
+            /* Even smaller preview on very small screens */
+            .preview {
+                padding: 15px;
+                font-size: 8pt;
+            }
+            
+            /* Preview tables responsive */
+            .preview table {
+                font-size: 9pt;
+            }
+            
+            .preview th,
+            .preview td {
+                padding: 8px 5px;
+                font-size: 9pt;
+            }
+            
+            /* Invoice preview adjustments */
+            .preview table.invoice-table th,
+            .preview table.invoice-table td {
+                padding: 10px 5px;
+                font-size: 9pt;
+            }
+            
+            /* Company header smaller */
+            .preview [style*="font-size: 15pt"] {
+                font-size: 13pt !important;
+            }
+            
+            /* INVOICE title smaller */
+            .preview [style*="font-size: 42pt"] {
+                font-size: 28pt !important;
+            }
+            
+            /* Info box text smaller */
+            .preview [style*="font-size: 11pt"] {
+                font-size: 10pt !important;
+            }
+            
+            /* Amounts readable */
+            .preview [style*="font-size: 10.5pt"] {
+                font-size: 9.5pt !important;
+            }
+            
+            /* TOTAL DUE readable */
+            .preview [style*="font-size: 12pt"] {
+                font-size: 11pt !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            /* Extra small screens */
+            h2 {
+                font-size: 1.3em;
+            }
+            
+            h3 {
+                font-size: 1.1em;
+            }
+            
+            .preview {
+                padding: 10px;
+                font-size: 7pt;
+            }
+            
+            .preview table {
+                font-size: 8pt;
+            }
+            
+            .preview th,
+            .preview td {
+                padding: 6px 3px;
+                font-size: 8pt;
+            }
+            
+            /* INVOICE title even smaller */
+            .preview [style*="font-size: 42pt"],
+            .preview [style*="font-size: 28pt"] {
+                font-size: 20pt !important;
+            }
+            
+            /* Button text smaller */
+            .btn {
+                font-size: 1em;
+                padding: 12px 15px;
+            }
+        }
+        
+        /* Mobile preview message */
+        .mobile-preview-message {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+            display: none;
+        }
+        
+        @media (max-width: 1024px) {
+            .mobile-preview-message {
+                display: block;
+            }
+        }
+        
+        /* ========================================
+           PRINT STYLES - PAGE BREAK CONTROL
+           ======================================== */
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                max-width: 100%;
+            }
+            
+            .panel {
+                box-shadow: none;
+                border: none;
+            }
+            
+            /* Hide workflow panels when printing */
+            .panel:not(#previewPanel) {
+                display: none;
+            }
+            
+            /* Remove preview padding for print */
+            .preview {
+                padding: 0.5in;
+            }
+            
+            /* Each content table is a category - keep together but allow breaks between */
+            table {
+                page-break-inside: avoid;  /* Keep each table together */
+                page-break-after: auto;    /* Allow breaks after each table */
+            }
+            
+            /* Prevent breaks inside rows */
+            tr {
+                page-break-inside: avoid;
+            }
+            
+            /* Category headers should stay with their first item */
+            tr[style*="background: #b7b7b7"] {
+                page-break-after: avoid;
+            }
+            
+            /* Keep header information together */
+            .preview > div:nth-child(1),
+            .preview > div:nth-child(2),
+            .preview > div:nth-child(3),
+            .preview > div:nth-child(4) {
+                page-break-after: avoid;
+                page-break-inside: avoid;
+            }
+            
+            /* Keep payment plan and signatures together at end */
+            .preview > div:last-child,
+            .preview > div:nth-last-child(2) {
+                page-break-inside: avoid;
+            }
+            
+            /* Ensure proper spacing between pages */
+            @page {
+                margin: 0.5in;
             }
         }
     </style>
@@ -342,7 +598,7 @@
 <body>
     <div class="container" id="mainContainer">
         <div class="panel">
-            <h2>SmartPro Document Generator v5.6</h2>
+            <h2>SmartPro Document Generator v5.17</h2>
             <div id="inputContainer"></div>
         </div>
 
@@ -527,8 +783,9 @@
             }
         }
 
-        // Start with document type selection
-        showDocumentTypeSelection();
+        // ============================================
+        // DOCUMENT TYPE SELECTION
+        // ============================================
         
         function showDocumentTypeSelection() {
             hidePreview();
@@ -937,6 +1194,10 @@
             document.getElementById('inputContainer').innerHTML = `
                 <h3>Step 3 of 3: Review Invoice</h3>
                 
+                <div class="mobile-preview-message">
+                    <strong>📱 Mobile View:</strong> Scroll down to see your invoice preview below the buttons.
+                </div>
+                
                 <div class="section-item">
                     <p>Review your invoice on the right. When everything looks good, click "Looks Good!" to proceed to export options.</p>
                     
@@ -1072,7 +1333,7 @@
                 </div>
                 
                 <div class="button-group">
-                    <button class="btn btn-primary" onclick="showSections()">Next: Add Work Sections →</button>
+                    <button class="btn btn-primary" onclick="showSections()">Next: Add Categories →</button>
                 </div>
             `;
             
@@ -1084,14 +1345,14 @@
             hidePreview();
             
             document.getElementById('inputContainer').innerHTML = `
-                <h3>Work Sections</h3>
+                <h3>Categories</h3>
                 
                 <button class="btn btn-success" onclick="saveDraft()" style="width: 100%; margin: 10px 0;">
                     💾 Save Draft
                 </button>
                 
                 <div id="sectionsList"></div>
-                <button class="btn btn-success" onclick="addSection()" style="width: 100%; margin: 10px 0;">+ Add Section</button>
+                <button class="btn btn-success" onclick="addSection()" style="width: 100%; margin: 10px 0;">+ Add Category</button>
                 
                 <div class="button-group">
                     <button class="btn btn-secondary" onclick="showBasicInfo()">← Back</button>
@@ -1164,7 +1425,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <h4 style="color: #b7b7b7; margin: 0;">${section.name}</h4>
                             <div>
-                                <button class="btn btn-success" onclick="editSectionCosts(${sIndex})" style="padding: 6px 12px; font-size: 0.9em;">💰 Section Costs</button>
+                                <button class="btn btn-success" onclick="editSectionCosts(${sIndex})" style="padding: 6px 12px; font-size: 0.9em;">💰 Category Costs</button>
                                 <button class="btn btn-success" onclick="addLineItem(${sIndex})" style="padding: 6px 12px; font-size: 0.9em;">+ Add Item</button>
                                 <button class="btn btn-secondary" onclick="editSectionName(${sIndex})" style="padding: 6px 12px; font-size: 0.9em;">✏️ Edit Name</button>
                                 <button class="remove-btn" onclick="removeSection(${sIndex})">×</button>
@@ -1173,7 +1434,7 @@
                         
                         ${sectionLevelTotal > 0 ? `
                             <div style="background: #e8f5e9; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-                                <strong>Section-Level Costs:</strong><br>
+                                <strong>Category-Level Costs:</strong><br>
                                 ${section.costOption === 1 ? `
                                     Total Only: <strong>$${(section.sectionTotal || 0).toFixed(2)}</strong>
                                 ` : `
@@ -1208,7 +1469,7 @@
                         ` : '<p style="color: #999; font-style: italic; margin: 10px 0;">No line items yet</p>'}
                         
                         <div style="text-align: right; margin-top: 10px; font-weight: bold; font-size: 1.1em; border-top: 2px solid #ddd; padding-top: 10px;">
-                            Section Total: $${grandTotal.toFixed(2)}
+                            Category Total: $${grandTotal.toFixed(2)}
                         </div>
                     </div>
                 `;
@@ -1218,7 +1479,7 @@
         }
 
         function addSection() {
-            const name = prompt("Enter section name (e.g., Painting, Electrical):");
+            const name = prompt("Enter category name (e.g., Painting, Electrical):");
             if (name && name.trim()) {
                 proposalData.sections.push({
                     name: name.trim(),
@@ -1232,7 +1493,7 @@
 
         function editSectionName(sectionIndex) {
             const section = proposalData.sections[sectionIndex];
-            const newName = prompt("Edit Section Name:", section.name);
+            const newName = prompt("Edit Category Name:", section.name);
             if (newName && newName.trim()) {
                 proposalData.sections[sectionIndex].name = newName.trim();
                 renderSections();
@@ -1242,79 +1503,334 @@
         function editSectionCosts(sectionIndex) {
             const section = proposalData.sections[sectionIndex];
             
-            const costType = prompt("Enter costs as:\n1. Total only\n2. Material and Labor breakdown\n\nEnter 1 or 2:", "1");
+            // Calculate current total
+            const currentTotal = section.sectionTotal || (section.material || 0) + (section.labor || 0);
             
-            if (costType === "1") {
-                // Just total
-                const currentTotal = section.sectionTotal || (section.material || 0) + (section.labor || 0);
-                const total = prompt("Section-level Total cost:", currentTotal);
-                if (total === null) return;
-                
-                const totalNum = parseFloat(total) || 0;
-                proposalData.sections[sectionIndex].material = 0;
-                proposalData.sections[sectionIndex].labor = 0;
-                proposalData.sections[sectionIndex].sectionTotal = totalNum;
-                proposalData.sections[sectionIndex].costOption = 1; // Track option
-            } else {
-                // Material and labor breakdown
-                const material = prompt("Section-level Material cost:", section.material || 0);
-                if (material === null) return;
-                
-                const labor = prompt("Section-level Labor cost:", section.labor || 0);
-                if (labor === null) return;
-                
-                proposalData.sections[sectionIndex].material = parseFloat(material) || 0;
-                proposalData.sections[sectionIndex].labor = parseFloat(labor) || 0;
-                proposalData.sections[sectionIndex].sectionTotal = 0;
-                proposalData.sections[sectionIndex].costOption = 2; // Track option
-            }
+            // Create modal overlay
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
             
-            renderSections();
+            modal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 8px; max-width: 500px; width: 90%; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+                    <h3 style="margin-top: 0;">Category Costs: ${section.name}</h3>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Category Total:</label>
+                        <input type="number" id="categoryTotal" step="0.01" min="0" value="${currentTotal}" style="width: 100%; padding: 10px; font-size: 16px; border: 2px solid #28a745; border-radius: 4px; font-weight: bold;" placeholder="0.00">
+                        <div style="font-size: 12px; color: #666; margin-top: 5px;">Enter the total cost for this category</div>
+                    </div>
+                    
+                    <div style="border-top: 1px solid #ddd; padding-top: 15px; margin-bottom: 15px;">
+                        <div style="font-weight: bold; margin-bottom: 10px; color: #666;">Optional: Break down into Material and Labor</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="breakdownMaterial" ${section.material > 0 ? 'checked' : ''} style="margin-right: 8px; width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-weight: bold;">Show Material cost</span>
+                        </label>
+                        <div id="materialBreakdownField" style="margin-top: 8px; display: ${section.material > 0 ? 'block' : 'none'};">
+                            <input type="number" id="categoryMaterial" step="0.01" min="0" value="${section.material || 0}" style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="breakdownLabor" ${section.labor > 0 ? 'checked' : ''} style="margin-right: 8px; width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-weight: bold;">Show Labor cost</span>
+                        </label>
+                        <div id="laborBreakdownField" style="margin-top: 8px; display: ${section.labor > 0 ? 'block' : 'none'};">
+                            <input type="number" id="categoryLabor" step="0.01" min="0" value="${section.labor || 0}" style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div style="font-size: 13px; color: #666; background: #f8f9fa; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+                        <strong>Note:</strong> If you don't check the breakdown boxes, only the total will be shown. If you check them, Material and Labor will be displayed separately in the table.
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button id="cancelBtn" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Cancel</button>
+                        <button id="saveBtn" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Save Costs</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Focus total field
+            const totalField = document.getElementById('categoryTotal');
+            setTimeout(() => totalField.focus(), 100);
+            
+            // Toggle material field visibility
+            document.getElementById('breakdownMaterial').addEventListener('change', function() {
+                document.getElementById('materialBreakdownField').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Toggle labor field visibility
+            document.getElementById('breakdownLabor').addEventListener('change', function() {
+                document.getElementById('laborBreakdownField').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Cancel button
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                document.body.removeChild(modal);
+            });
+            
+            // Close on outside click
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
+            
+            // Save button
+            document.getElementById('saveBtn').addEventListener('click', function() {
+                const total = parseFloat(document.getElementById('categoryTotal').value) || 0;
+                const breakdownMaterial = document.getElementById('breakdownMaterial').checked;
+                const breakdownLabor = document.getElementById('breakdownLabor').checked;
+                
+                if (breakdownMaterial || breakdownLabor) {
+                    // Use Material/Labor breakdown
+                    const material = breakdownMaterial ? (parseFloat(document.getElementById('categoryMaterial').value) || 0) : 0;
+                    const labor = breakdownLabor ? (parseFloat(document.getElementById('categoryLabor').value) || 0) : 0;
+                    
+                    proposalData.sections[sectionIndex].material = material;
+                    proposalData.sections[sectionIndex].labor = labor;
+                    proposalData.sections[sectionIndex].sectionTotal = 0;
+                    proposalData.sections[sectionIndex].costOption = 2;
+                } else {
+                    // Use total only
+                    proposalData.sections[sectionIndex].material = 0;
+                    proposalData.sections[sectionIndex].labor = 0;
+                    proposalData.sections[sectionIndex].sectionTotal = total;
+                    proposalData.sections[sectionIndex].costOption = 1;
+                }
+                
+                document.body.removeChild(modal);
+                renderSections();
+            });
+            
+            // Enter key to save
+            modal.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('saveBtn').click();
+                }
+            });
         }
 
         function removeSection(index) {
-            if (confirm('Remove this section and all its items?')) {
+            if (confirm('Remove this category and all its items?')) {
                 proposalData.sections.splice(index, 1);
                 renderSections();
             }
         }
 
         function addLineItem(sectionIndex) {
-            const description = prompt("Item description:");
-            if (!description || !description.trim()) return;
+            // Create modal overlay
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
             
-            const material = parseFloat(prompt("Material cost (enter 0 if none):", "0") || 0);
-            const labor = parseFloat(prompt("Labor cost (enter 0 if none):", "0") || 0);
-            const total = material + labor;
+            modal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 8px; max-width: 500px; width: 90%; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+                    <h3 style="margin-top: 0;">Add Line Item</h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Description:</label>
+                        <input type="text" id="itemDescription" style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;" placeholder="Enter item description">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="includeMaterial" style="margin-right: 8px; width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-weight: bold;">Include Material cost</span>
+                        </label>
+                        <div id="materialField" style="margin-top: 8px; display: none;">
+                            <input type="number" id="itemMaterial" step="0.01" min="0" style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="includeLabor" style="margin-right: 8px; width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-weight: bold;">Include Labor cost</span>
+                        </label>
+                        <div id="laborField" style="margin-top: 8px; display: none;">
+                            <input type="number" id="itemLabor" step="0.01" min="0" style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button id="cancelBtn" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Cancel</button>
+                        <button id="saveBtn" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Add Item</button>
+                    </div>
+                </div>
+            `;
             
-            proposalData.sections[sectionIndex].lineItems.push({
-                description: description.trim(),
-                material: material,
-                labor: labor,
-                total: total
+            document.body.appendChild(modal);
+            
+            // Focus description field
+            const descField = document.getElementById('itemDescription');
+            setTimeout(() => descField.focus(), 100);
+            
+            // Toggle material field visibility
+            document.getElementById('includeMaterial').addEventListener('change', function() {
+                document.getElementById('materialField').style.display = this.checked ? 'block' : 'none';
             });
             
-            renderSections();
+            // Toggle labor field visibility
+            document.getElementById('includeLabor').addEventListener('change', function() {
+                document.getElementById('laborField').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Cancel button
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                document.body.removeChild(modal);
+            });
+            
+            // Close on outside click
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
+            
+            // Save button
+            document.getElementById('saveBtn').addEventListener('click', function() {
+                const description = document.getElementById('itemDescription').value.trim();
+                if (!description) {
+                    alert('Please enter a description');
+                    return;
+                }
+                
+                const includeMaterial = document.getElementById('includeMaterial').checked;
+                const includeLabor = document.getElementById('includeLabor').checked;
+                
+                const material = includeMaterial ? (parseFloat(document.getElementById('itemMaterial').value) || 0) : 0;
+                const labor = includeLabor ? (parseFloat(document.getElementById('itemLabor').value) || 0) : 0;
+                const total = material + labor;
+                
+                proposalData.sections[sectionIndex].lineItems.push({
+                    description: description,
+                    material: material,
+                    labor: labor,
+                    total: total
+                });
+                
+                document.body.removeChild(modal);
+                renderSections();
+            });
+            
+            // Enter key to save
+            modal.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && e.target.id !== 'itemDescription') {
+                    document.getElementById('saveBtn').click();
+                }
+            });
         }
 
         function editLineItem(sectionIndex, itemIndex) {
             const item = proposalData.sections[sectionIndex].lineItems[itemIndex];
             
-            const description = prompt("Edit description:", item.description);
-            if (!description || !description.trim()) return;
+            // Create modal overlay
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
             
-            const material = parseFloat(prompt("Material cost:", item.material) || 0);
-            const labor = parseFloat(prompt("Labor cost:", item.labor) || 0);
-            const total = material + labor;
+            modal.innerHTML = `
+                <div style="background: white; padding: 30px; border-radius: 8px; max-width: 500px; width: 90%; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+                    <h3 style="margin-top: 0;">Edit Line Item</h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Description:</label>
+                        <input type="text" id="itemDescription" value="${item.description}" style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="includeMaterial" ${item.material > 0 ? 'checked' : ''} style="margin-right: 8px; width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-weight: bold;">Include Material cost</span>
+                        </label>
+                        <div id="materialField" style="margin-top: 8px; display: ${item.material > 0 ? 'block' : 'none'};">
+                            <input type="number" id="itemMaterial" step="0.01" min="0" value="${item.material}" style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="checkbox" id="includeLabor" ${item.labor > 0 ? 'checked' : ''} style="margin-right: 8px; width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-weight: bold;">Include Labor cost</span>
+                        </label>
+                        <div id="laborField" style="margin-top: 8px; display: ${item.labor > 0 ? 'block' : 'none'};">
+                            <input type="number" id="itemLabor" step="0.01" min="0" value="${item.labor}" style="width: 100%; padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px;" placeholder="0.00">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                        <button id="cancelBtn" style="padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Cancel</button>
+                        <button id="saveBtn" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Save Changes</button>
+                    </div>
+                </div>
+            `;
             
-            proposalData.sections[sectionIndex].lineItems[itemIndex] = {
-                description: description.trim(),
-                material: material,
-                labor: labor,
-                total: total
-            };
+            document.body.appendChild(modal);
             
-            renderSections();
+            // Focus description field
+            const descField = document.getElementById('itemDescription');
+            setTimeout(() => descField.focus(), 100);
+            
+            // Toggle material field visibility
+            document.getElementById('includeMaterial').addEventListener('change', function() {
+                document.getElementById('materialField').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Toggle labor field visibility
+            document.getElementById('includeLabor').addEventListener('change', function() {
+                document.getElementById('laborField').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Cancel button
+            document.getElementById('cancelBtn').addEventListener('click', function() {
+                document.body.removeChild(modal);
+            });
+            
+            // Close on outside click
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    document.body.removeChild(modal);
+                }
+            });
+            
+            // Save button
+            document.getElementById('saveBtn').addEventListener('click', function() {
+                const description = document.getElementById('itemDescription').value.trim();
+                if (!description) {
+                    alert('Please enter a description');
+                    return;
+                }
+                
+                const includeMaterial = document.getElementById('includeMaterial').checked;
+                const includeLabor = document.getElementById('includeLabor').checked;
+                
+                const material = includeMaterial ? (parseFloat(document.getElementById('itemMaterial').value) || 0) : 0;
+                const labor = includeLabor ? (parseFloat(document.getElementById('itemLabor').value) || 0) : 0;
+                const total = material + labor;
+                
+                proposalData.sections[sectionIndex].lineItems[itemIndex] = {
+                    description: description,
+                    material: material,
+                    labor: labor,
+                    total: total
+                };
+                
+                document.body.removeChild(modal);
+                renderSections();
+            });
+            
+            // Enter key to save
+            modal.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && e.target.id !== 'itemDescription') {
+                    document.getElementById('saveBtn').click();
+                }
+            });
         }
 
         function removeLineItem(sectionIndex, itemIndex) {
@@ -1503,11 +2019,11 @@
                 </div>
                 
                 <div style="background: #fff3cd; padding: 12px; border-radius: 8px; margin: 15px 0; border: 1px solid #ffc107;">
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-success" onclick="loadSavedDocument()" style="flex: 1;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-success" onclick="loadSavedDocument()" style="flex: 1; min-width: 140px;">
                             📁 Load Saved ${proposalData.documentType === 'invoice' ? 'Invoice' : 'Document'}
                         </button>
-                        <button class="btn btn-danger" onclick="startOver()" style="flex: 1;">
+                        <button class="btn btn-danger" onclick="startOver()" style="flex: 1; min-width: 140px;">
                             🔄 Start Over
                         </button>
                     </div>
@@ -1780,9 +2296,9 @@
             const docTypeLabel = proposalData.documentType === 'invoice' ? 'Invoice' : 
                                  (proposalData.documentType === 'proposal' ? 'Proposal' : 'Change Order');
             const docTitle = proposalData.proposalTitle || `Renovations ${docTypeLabel}`;
-            const formattedDate = proposalData.date ? new Date(proposalData.date).toLocaleDateString() : new Date().toLocaleDateString();
+            const formattedDate = proposalData.date ? proposalData.date.replace(/-/g, '/').replace(/(\d{4})\/(\d{2})\/(\d{2})/, '$2/$3/$1') : new Date().toLocaleDateString('en-US');
             
-            // Calculate total including section-level costs
+            // Calculate total including category-level costs
             const sectionsTotal = proposalData.sections.reduce((sum, section) => {
                 const lineItemsTotal = section.lineItems.reduce((itemSum, item) => itemSum + item.total, 0);
                 const sectionLevelTotal = (section.material || 0) + (section.labor || 0) + (section.sectionTotal || 0);
@@ -1791,12 +2307,17 @@
             const invoiceTotal = sectionsTotal + proposalData.dumpsterFee + proposalData.permitFee + proposalData.gcFee;
             
             preview.innerHTML = `
-                <div style="text-align: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #333; font-size: 10pt;">
-                    <h3 style="margin: 0; font-size: 11pt; font-weight: normal;">${companyInfo.name}</h3>
-                    <p style="margin: 3px 0; font-size: 10pt;">${companyInfo.address1}, ${companyInfo.address2} ${companyInfo.phone}</p>
+                <!-- Centered Company Header -->
+                <div style="text-align: center; font-family: Arial, sans-serif; margin-bottom: 10px;">
+                    <div style="font-size: 11pt; font-weight: bold; margin-bottom: 2px;">${companyInfo.name}</div>
+                    <div style="font-size: 10pt;">${companyInfo.address1}, ${companyInfo.address2} ${companyInfo.phone}</div>
+                    <div style="border-bottom: 2px solid #000; margin: 10px 0;"></div>
                 </div>
                 
-                <h1 style="text-align: center; margin: 15px 0; font-size: 12pt; font-weight: bold;">${docTitle}</h1>
+                <!-- Centered Document Title -->
+                <div style="text-align: center; font-family: Arial, sans-serif; margin: 20px 0;">
+                    <div style="font-size: 14pt; font-weight: bold;">${docTitle}</div>
+                </div>
                 
                 ${proposalData.isPaid ? `
                     <div style="text-align: center; margin: 15px 0;">
@@ -1806,112 +2327,187 @@
                     </div>
                 ` : ''}
                 
-                <div style="margin: 15px 0; font-size: 10pt;">
-                    <p style="margin: 3px 0;"><strong>Date:</strong> ${formattedDate}</p>
-                    <p style="margin: 3px 0;"><strong>Client:</strong> ${proposalData.client || '[Client]'}</p>
-                    <p style="margin: 3px 0;"><strong>Address:</strong> ${proposalData.address || '[Address]'}</p>
+                <!-- Left-Aligned Date/Client/Address -->
+                <div style="font-family: Arial, sans-serif; font-size: 10pt; margin: 20px 0; text-align: left;">
+                    <div style="margin: 3px 0;"><strong>Date:</strong> ${formattedDate}</div>
+                    <div style="margin: 3px 0;"><strong>Client:</strong> ${proposalData.client || '[Client Name]'}</div>
+                    <div style="margin: 3px 0;"><strong>Address:</strong> ${proposalData.address || '[Client Address]'}</div>
                 </div>
                 
-                <table>
+                <!-- Single Header Table (Only Material/Labor/Total Header) -->
+                <table style="width: 100%; border-collapse: collapse; margin: 20px 0 0 0; font-family: Arial, sans-serif; border-left: 2px solid #000; border-right: 2px solid #000; border-top: 2px solid #000;">
                     <thead>
                         <tr>
-                            <th style="width: 55%; text-align: left;"></th>
-                            <th style="width: 14%; text-align: right;">Material</th>
-                            <th style="width: 14%; text-align: right;">Labor</th>
-                            <th style="width: 17%; text-align: right;">Total</th>
+                            <th style="border: 1px solid #000; padding: 8px; text-align: left; font-size: 10pt; font-weight: normal; width: auto;"></th>
+                            <th style="border: 1px solid #000; padding: 8px; text-align: center; font-size: 10pt; font-weight: bold; width: 110px;">Material</th>
+                            <th style="border: 1px solid #000; padding: 8px; text-align: center; font-size: 10pt; font-weight: bold; width: 110px;">Labor</th>
+                            <th style="border: 1px solid #000; padding: 8px; text-align: center; font-size: 10pt; font-weight: bold; width: 110px;">Total</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        ${proposalData.sections.map(section => {
-                            // Calculate sums of all line items
-                            const lineItemsMaterialSum = section.lineItems.reduce((sum, item) => sum + (item.material || 0), 0);
-                            const lineItemsLaborSum = section.lineItems.reduce((sum, item) => sum + (item.labor || 0), 0);
-                            const lineItemsTotal = section.lineItems.reduce((sum, item) => sum + item.total, 0);
-                            
-                            // Only add section costs to Material/Labor if option 2 was used
-                            // If option 1 (total only), add to grand total but not to Material/Labor columns
-                            const sectionMaterialForColumn = (section.costOption === 2) ? (section.material || 0) : 0;
-                            const sectionLaborForColumn = (section.costOption === 2) ? (section.labor || 0) : 0;
-                            const sectionTotalOnly = (section.costOption === 1) ? (section.sectionTotal || 0) : 0;
-                            
-                            const totalMaterial = lineItemsMaterialSum + sectionMaterialForColumn;
-                            const totalLabor = lineItemsLaborSum + sectionLaborForColumn;
-                            const grandTotal = lineItemsTotal + sectionMaterialForColumn + sectionLaborForColumn + sectionTotalOnly;
-                            
-                            return `
-                                <tr class="section-header">
-                                    <td><strong>${section.name}</strong></td>
-                                    <td><strong>${totalMaterial > 0 ? '$ ' + totalMaterial.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</strong></td>
-                                    <td><strong>${totalLabor > 0 ? '$ ' + totalLabor.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</strong></td>
-                                    <td><strong>$ ${grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                </table>
+                
+                <!-- Category Tables (No Headers, Seamless) -->
+                ${proposalData.sections.map(section => {
+                    // Calculate sums of all line items
+                    const lineItemsMaterialSum = section.lineItems.reduce((sum, item) => sum + (item.material || 0), 0);
+                    const lineItemsLaborSum = section.lineItems.reduce((sum, item) => sum + (item.labor || 0), 0);
+                    const lineItemsTotal = section.lineItems.reduce((sum, item) => sum + item.total, 0);
+                    
+                    // Only add section costs to Material/Labor if option 2 was used
+                    const sectionMaterialForColumn = (section.costOption === 2) ? (section.material || 0) : 0;
+                    const sectionLaborForColumn = (section.costOption === 2) ? (section.labor || 0) : 0;
+                    const sectionTotalOnly = (section.costOption === 1) ? (section.sectionTotal || 0) : 0;
+                    
+                    const totalMaterial = lineItemsMaterialSum + sectionMaterialForColumn;
+                    const totalLabor = lineItemsLaborSum + sectionLaborForColumn;
+                    const grandTotal = lineItemsTotal + sectionMaterialForColumn + sectionLaborForColumn + sectionTotalOnly;
+                    
+                    return `
+                        <!-- Category: ${section.name} -->
+                        <table style="width: 100%; border-collapse: collapse; margin: 0; font-family: Arial, sans-serif; border-left: 2px solid #000; border-right: 2px solid #000; page-break-inside: avoid;">
+                            <tbody>
+                                <tr style="background: #b7b7b7; page-break-after: avoid;">
+                                    <td style="border: 1px solid #000; padding: 8px; font-size: 11pt; font-weight: bold; width: auto;">${section.name}</td>
+                                    <td style="border: 1px solid #000; padding: 8px; text-align: right; font-size: 11pt; width: 110px;">${totalMaterial > 0 ? '$' + totalMaterial.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</td>
+                                    <td style="border: 1px solid #000; padding: 8px; text-align: right; font-size: 11pt; width: 110px;">${totalLabor > 0 ? '$' + totalLabor.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</td>
+                                    <td style="border: 1px solid #000; padding: 8px; text-align: right; font-size: 11pt; font-weight: bold; width: 110px;">$ ${grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
                                 </tr>
                                 ${section.lineItems.map(item => `
-                                    <tr>
-                                        <td>${item.description}</td>
-                                        <td>${item.material > 0 ? '$ ' + item.material.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</td>
-                                        <td>${item.labor > 0 ? '$ ' + item.labor.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</td>
-                                        <td></td>
+                                    <tr style="background: white; page-break-inside: avoid;">
+                                        <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; font-size: 10pt; width: auto;">${item.description}</td>
+                                        <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; text-align: right; font-size: 10pt; width: 110px;">${item.material > 0 ? '$' + item.material.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</td>
+                                        <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; text-align: right; font-size: 10pt; width: 110px;">${item.labor > 0 ? '$' + item.labor.toLocaleString('en-US', {minimumFractionDigits: 2}) : ''}</td>
+                                        <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; text-align: right; font-size: 10pt; width: 110px;"></td>
                                     </tr>
                                 `).join('')}
-                            `;
-                        }).join('')}
-                        ${proposalData.dumpsterFee > 0 ? `
-                            <tr class="section-header">
-                                <td><strong>Dumpster Fee</strong></td>
-                                <td></td>
-                                <td></td>
-                                <td><strong>$ ${proposalData.dumpsterFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                            </tbody>
+                        </table>
+                    `;
+                }).join('')}
+                
+                <!-- Additional Fees (No Headers, Seamless) -->
+                ${proposalData.dumpsterFee > 0 ? `
+                    <table style="width: 100%; border-collapse: collapse; margin: 0; font-family: Arial, sans-serif; border-left: 2px solid #000; border-right: 2px solid #000; page-break-inside: avoid;">
+                        <tbody>
+                            <tr style="background: #b7b7b7; page-break-after: avoid;">
+                                <td style="border: 1px solid #000; padding: 8px; font-size: 11pt; font-weight: bold; width: auto;">Dumpster Fee</td>
+                                <td style="border: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border: 1px solid #000; padding: 8px; text-align: right; font-size: 11pt; font-weight: bold; width: 110px;">$ ${proposalData.dumpsterFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
                             </tr>
-                        ` : ''}
-                        ${proposalData.permitFee > 0 ? `
-                            <tr class="section-header">
-                                <td><strong>Permit Fee</strong></td>
-                                <td></td>
-                                <td></td>
-                                <td><strong>$ ${proposalData.permitFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                            <tr style="background: white;">
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; font-size: 10pt; width: auto;">Dumpster Fee</td>
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; width: 110px;"></td>
                             </tr>
-                        ` : ''}
-                        ${proposalData.gcFee > 0 ? `
-                            <tr class="section-header">
-                                <td><strong>G.C. Fee</strong></td>
-                                <td></td>
-                                <td></td>
-                                <td><strong>$ ${proposalData.gcFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                        </tbody>
+                    </table>
+                ` : ''}
+                
+                ${proposalData.permitFee > 0 ? `
+                    <table style="width: 100%; border-collapse: collapse; margin: 0; font-family: Arial, sans-serif; border-left: 2px solid #000; border-right: 2px solid #000; page-break-inside: avoid;">
+                        <tbody>
+                            <tr style="background: #b7b7b7; page-break-after: avoid;">
+                                <td style="border: 1px solid #000; padding: 8px; font-size: 11pt; font-weight: bold; width: auto;">Permit Fee</td>
+                                <td style="border: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border: 1px solid #000; padding: 8px; text-align: right; font-size: 11pt; font-weight: bold; width: 110px;">$ ${proposalData.permitFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
                             </tr>
-                        ` : ''}
-                        <tr class="invoice-total-row">
-                            <td colspan="3"><strong>Invoice Total: ${formattedDate}</strong></td>
-                            <td><strong>$ ${invoiceTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+                            <tr style="background: white;">
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; font-size: 10pt; width: auto;">Permit Fee</td>
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; width: 110px;"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                ` : ''}
+                
+                ${proposalData.gcFee > 0 ? `
+                    <table style="width: 100%; border-collapse: collapse; margin: 0; font-family: Arial, sans-serif; border-left: 2px solid #000; border-right: 2px solid #000; page-break-inside: avoid;">
+                        <tbody>
+                            <tr style="background: #b7b7b7; page-break-after: avoid;">
+                                <td style="border: 1px solid #000; padding: 8px; font-size: 11pt; font-weight: bold; width: auto;">G.C. Fee</td>
+                                <td style="border: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border: 1px solid #000; padding: 8px; text-align: right; font-size: 11pt; font-weight: bold; width: 110px;">$ ${proposalData.gcFee.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+                            </tr>
+                            <tr style="background: white;">
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; font-size: 10pt; width: auto;">G.C. Fee</td>
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; width: 110px;"></td>
+                                <td style="border-left: 1px solid #000; border-right: 1px solid #000; padding: 8px; width: 110px;"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                ` : ''}
+                
+                <!-- Invoice Total (No Header, Bottom Border) -->
+                <table style="width: 100%; border-collapse: collapse; margin: 0; font-family: Arial, sans-serif; border: 2px solid #000;">
+                    <tbody>
+                        <tr style="background: #999999;">
+                            <td style="border: 1px solid #000; padding: 8px; font-size: 11pt; font-weight: bold; width: auto;">Invoice Total: ${formattedDate}</td>
+                            <td style="border: 1px solid #000; padding: 8px; width: 110px;"></td>
+                            <td style="border: 1px solid #000; padding: 8px; width: 110px;"></td>
+                            <td style="border: 1px solid #000; padding: 8px; text-align: right; font-size: 11pt; font-weight: bold; width: 110px;">$ ${invoiceTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
                         </tr>
                     </tbody>
                 </table>
                 
+                <!-- Notes Section -->
                 ${proposalData.notes ? `
-                    <div style="margin: 20px 0; font-size: 10pt;">
-                        <p style="margin: 3px 0;"><strong>Notes:</strong></p>
-                        <p style="margin: 3px 0;">${proposalData.notes}</p>
+                    <div style="margin: 20px 0; font-family: Arial, sans-serif;">
+                        <div style="font-size: 10pt; font-weight: bold; margin-bottom: 5px;">Notes:</div>
+                        <div style="font-size: 10pt;">${proposalData.notes}</div>
                     </div>
                 ` : ''}
                 
-                <div style="margin: 20px 0; font-size: 10pt;">
-                    <p style="margin: 3px 0;"><strong>Payment Plan:</strong></p>
-                    <ul style="margin: 5px 0 5px 20px;">
-                        ${proposalData.paymentPlan.map(payment => {
-                            const amount = invoiceTotal * (payment.percent / 100);
-                            return `<li style="margin: 2px 0;">${payment.label}: ${payment.percent}% - $${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</li>`;
-                        }).join('')}
-                    </ul>
-                    <p style="margin: 3px 0;"><strong>Total due: $${invoiceTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></p>
-                </div>
+                <!-- Payment Plan Section -->
+                ${proposalData.paymentPlan && proposalData.paymentPlan.length > 0 ? `
+                    <div style="margin: 20px 0; font-family: Arial, sans-serif;">
+                        <div style="font-size: 10pt; font-weight: bold; margin-bottom: 5px;">Payment Plan:</div>
+                        <ul style="margin: 5px 0 5px 20px; font-size: 10pt; line-height: 1.6;">
+                            ${proposalData.paymentPlan.map(payment => {
+                                const amount = invoiceTotal * (payment.percent / 100);
+                                return `<li style="margin: 2px 0;">${payment.label}: ${payment.percent}% - $${amount.toLocaleString('en-US', {minimumFractionDigits: 2})}</li>`;
+                            }).join('')}
+                        </ul>
+                        <div style="font-size: 10pt; font-weight: bold; margin-top: 8px;">Total due: $${invoiceTotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</div>
+                    </div>
+                ` : ''}
                 
-                <div style="margin-top: 40px; font-size: 10pt;">
-                    <p style="margin: 3px 0;"><strong>Accepted by:</strong></p>
-                    <p style="margin: 10px 0 3px 0;"><strong>Client:</strong> ${proposalData.client || '[Client]'} <span style="margin-left: 50px;"><strong>Date:</strong></span></p>
-                    <p style="border-top: 2px solid #000; width: 300px; margin: 20px 0;"></p>
-                    <p style="margin: 10px 0 3px 0;"><strong>Contractor:</strong> David Gissel <span style="margin-left: 50px;"><strong>Date:</strong></span></p>
-                    <p style="border-top: 2px solid #000; width: 300px; margin: 20px 0;"></p>
+                <!-- Signature Section -->
+                <div style="margin: 40px 0 20px 0; font-family: Arial, sans-serif; font-size: 10pt;">
+                    <div style="font-weight: bold; margin-bottom: 10px;">Accepted by:</div>
+                    
+                    <div style="margin: 20px 0;">
+                        <div><strong>Client:</strong> ${proposalData.client || '_________________'}</div>
+                        <div style="margin: 5px 0;"><strong>Date:</strong></div>
+                        <div style="border-bottom: 1px solid #000; width: 300px; margin: 20px 0;"></div>
+                    </div>
+                    
+                    <div style="margin: 20px 0;">
+                        <div><strong>Contractor:</strong> David Gissel</div>
+                        <div style="margin: 5px 0;"><strong>Date:</strong></div>
+                        <div style="border-bottom: 1px solid #000; width: 300px; margin: 20px 0;"></div>
+                    </div>
                 </div>
             `;
+        }
+        
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        
+        // Initialize the app when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                showDocumentTypeSelection();
+            });
+        } else {
+            // DOM already loaded
+            showDocumentTypeSelection();
         }
     </script>
 </body>
